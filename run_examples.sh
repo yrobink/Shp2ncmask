@@ -23,6 +23,6 @@ fi
 ## The second use the Lambert Zone II projection, the figure is re-projeted on lat lon coordinates.
 ## The two masks use a lat lon shapefile, so the iepsg is 4326
 ## The two masks use the weight method, i.e. the values are the percentage of area for each cell
-./shp2ncmask -m weight -i $data_test -iepsg 4326 -o data/mask_4326.nc -g -5,10,0.5,41,52,0.5 -oepsg 4326 -fig figures/control_4326.png -fepsg 4326
-./shp2ncmask -m weight -i $data_test -iepsg 4326 -o data/mask_27572.nc -g 60000,1196000,64000,1617000,2681000,64000 -oepsg 27572 -fig figures/control_27572_64km.png -fepsg 4326
+./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_4326.nc -g -5,10,0.5,41,52,0.5 -oepsg 4326 -fig figures/control_4326.png -fepsg 4326
+./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_27572.nc -g 60000,1196000,64000,1617000,2681000,64000 -oepsg 27572 -fig figures/control_27572_64km.png -fepsg 4326
 
