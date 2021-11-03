@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+## Others files
+*.swp
+*.png
+*.nc
+data
