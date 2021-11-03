@@ -130,6 +130,6 @@ dmypy.json
 
 ## Others files
 *.swp
-*.png
+./*.png
 *.nc
 data
