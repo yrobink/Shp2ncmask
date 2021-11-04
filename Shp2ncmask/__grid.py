@@ -31,6 +31,19 @@ from shapely.geometry import Point,MultiPoint,Polygon,MultiPolygon
 
 
 class Grid:
+	"""
+	Class which represents a grid.
+	
+	- xparams is a list of three values describing the x-axis: [xmin,xmax,dx]
+	- yparams is a list of three values describing the y-axis: [ymin,ymax,dy]
+	- x is the array of center of the grid along the x-axis
+	- y is the array of center of the grid along the x-axis
+	- X and Y are the grid in 2d form
+	- sq is a GeoDataFrame describing all cells as polygon.
+	- pt is a GeoDataFrame describing all center of the cells
+	- lat is the array (1d or 2d) of latitude, equal to y if epsg == 4326
+	- lon is the array (1d or 2d) of longitude, equal to x if epsg == 4326
+	"""
 	
 	def __init__( self , xparams , yparams , epsg = 4326 , ppe = 100 ):##{{{
 		self.xparams = xparams

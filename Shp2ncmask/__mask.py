@@ -32,6 +32,9 @@ from .__version import version
 ###############
 
 def build_mask( grid , ish , method ):##{{{
+	"""
+	Build the 2d mask according to the method.
+	"""
 	mask = np.zeros( (grid.nx*grid.ny) )
 	
 	if method == "point":
@@ -62,6 +65,9 @@ def build_mask( grid , ish , method ):##{{{
 ##}}}
 
 def mask_to_dataset( mask , grid , oepsg , method ):##{{{
+	"""
+	Transform the 2d array mask into a xarray.Dataset. Add also attributes.
+	"""
 	if oepsg == "4326":
 		amask = xr.DataArray( mask.reshape(grid.y.size,grid.x.size) , dims = ["lat","lon"] , coords = [grid.lat,grid.lon] )
 		dmask = xr.Dataset( { "mask" : amask } )

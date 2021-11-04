@@ -32,6 +32,9 @@ import matplotlib.colors   as mplc
 ###############
 
 def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
+	"""
+	Plot function of the mask
+	"""
 	
 	mpl_params = dict(mpl.rcParams)
 	mpl.rcdefaults()

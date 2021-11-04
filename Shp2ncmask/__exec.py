@@ -38,7 +38,9 @@ from .__plot       import build_figure
 ###############
 
 def arguments( argv ):##{{{
-	
+	"""
+	This function is used to read and check args given by the users.
+	"""
 	kwargs = {}
 	kwargs["help"]      = False
 	kwargs["method"]    = "point"
@@ -220,6 +222,9 @@ def arguments( argv ):##{{{
 ##}}}
 
 def run( argv ):##{{{
+	"""
+	Toolchain.
+	"""
 	
 	## Read args
 	##==========
