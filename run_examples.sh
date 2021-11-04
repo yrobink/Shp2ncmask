@@ -17,10 +17,14 @@ then
 	unzip data/$data_test_zip -d data/gadm36_FRA_shp/
 fi
 
+## First print the documentation
+##==============================
+./shp2ncmask.py --help
+
 ## Now build two masks
 ##====================
 ## The first is a mask in a lat lon grid on France
-## The second use the Lambert Zone II projection, the figure is re-projeted on lat lon coordinates.
+## The second use the Lambert Zone II projection, the figure is re-projected on lat lon coordinates.
 ## The two masks use a lat lon shapefile, so the iepsg is 4326
 ## The two masks use the weight method, i.e. the values are the percentage of area for each cell
 ./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_4326.nc -g -5,10,0.5,41,52,0.5 -oepsg 4326 -fig figures/control_4326.png -fepsg 4326
