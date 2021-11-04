@@ -16,6 +16,9 @@
 ## You should have received a copy of the GNU General Public License
 ## along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
+from .__version import version
+
+
 doc_shp2ncmask = """
       _          ____                                 _    
   ___| |__  _ __|___ \ _ __   ___ _ __ ___   __ _ ___| | __
@@ -140,6 +143,8 @@ along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 Sources and author
 ------------------
 - Sources are available at https://github.com/yrobink/Shp2ncmask.
-- Author: Yoann Robin, yoann.robin.k@gmail.com 
-"""
+- Author: Yoann Robin, yoann.robin.k@gmail.com
+
+version {}
+""".format(version)
 
