@@ -8,7 +8,7 @@ projections can be customized.
 ### Parameters
 
 `-g` (or `--grid`) [comma separated float]\
-	Grid used. See the grid section.
+&nbsp;&nbsp;&nbsp;&nbsp;Grid used. See the grid section.
 `-i` (or `--input`) [string]
     The input shapefile.
 `-o` (or `--output`) [string]
