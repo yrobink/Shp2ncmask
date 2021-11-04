@@ -75,7 +75,7 @@ def arguments( argv ):##{{{
 		if arg in ["-o","--output"]:
 			kwargs["output"] = argv[i+1]
 			read_index = read_index + [i,i+1]
-		if arg in ["--pt-per-edge"]:
+		if arg in ["--point-per-edge"]:
 			kwargs["ppe"] = argv[i+1]
 			read_index = read_index + [i,i+1]
 		if arg in ["-fig","--figure"]:
