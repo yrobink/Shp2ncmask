@@ -67,14 +67,18 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	grid.sq.to_crs(epsg=fepsg).plot( ax = ax , facecolor = "none" , edgecolor = "red" )
 	im = ax.scatter( XY[:,0] , XY[:,1] , c = np.floor( n_step * mask.ravel() ) / n_step , cmap = cmap )
 	plt.yticks(rotation = 90)
-	ax.set_xlabel( r"$x$ coordinate" )
-	ax.set_ylabel( r"$y$ coordinate" )
-	ax.set_title( "{} mask (proj. EPSG:{})".format(method.title(),fepsg) )
+	if fepsg == "4326":
+		ax.set_xlabel( r"Longitude" )
+		ax.set_ylabel( r"Latitude" )
+	else:
+		ax.set_xlabel( r"$x$ coordinate (proj. EPSG:{})".format(fepsg) )
+		ax.set_ylabel( r"$y$ coordinate (proj. EPSG:{})".format(fepsg) )
+	ax.set_title( "{} mask (proj. EPSG:{})".format(method.title(),oepsg) )
 	
 	## Plot colorbar
 	gax = g[3,1].subgridspec( 1 , 3 , width_ratios = [0.05,1,0.05] )
 	cax = fig.add_subplot(gax[0,1])
-	cbar = plt.colorbar( mappable = im , cax = cax , orientation = "horizontal" , ticks = [0,0.25,0.5,0.75,1] , label = "Mask values (proj. EPSG:{})".format(oepsg) )
+	cbar = plt.colorbar( mappable = im , cax = cax , orientation = "horizontal" , ticks = [0,0.25,0.5,0.75,1] , label = "Mask values" )
 	cbar.ax.set_xticklabels( ["0","0.25","0.5","0.75","1"] )
 	
 	## Units for figsize
@@ -85,18 +89,27 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	
 	
 	## Find width and heigh
-	## The reference is the height of subplot of the map, others heights are:
-	## Height for the title, , Height for x-label, height of the colorbar and height of ticks / label of the colorbar
-	## Width is determined as the ratio of the subplot of the map, we add:
-	## A space of y-label, a very little space to show the right black line of axis
-	height_cax = 100*mm
-	heights    = np.array([2*fontsize,height_cax,4.5*fontsize,1.5*fontsize,3.6*fontsize])
-	height     = np.sum(heights)
-	widths     = np.array([4*fontsize , height_cax / ax.get_data_ratio() / ax.get_aspect(),2*axeslw])
-	width      = np.sum(widths)
+	## The reference is the total width, equal to 100mm, then:
+	## To the left of the map, an extra space of 3.8*fontsize is added for y-label
+	## To the right of the map, an extra space of 2*axeslw is added to show axes
+	## So, the width_ax is the width minus these values
+	## Height is given by the ratio of width_ax, where ratio is a product of data ratio and aspect ratio
+	## An extra space of 2*fontsize is added on the top for title
+	## An extra space of 4.5*fontsize is added below for x-label and a space with colorbar
+	## A space of 1.5*fontsize is added for colorbar
+	## And a space of 3.6 fontsize is added for labels / title of colorbar
+	width    = 100*mm
+	width_ax = width - (3.8*fontsize + 2*axeslw)
+	widths   = np.array([3.8*fontsize , width_ax ,2*axeslw])
 	
-	im.set_sizes([ 2 * min(width,height_cax) / max(grid.nx,grid.ny) / pt ])
+	height_ax = width_ax * ax.get_data_ratio() * ax.get_aspect()
+	heights   = np.array([2*fontsize,height_ax,4.5*fontsize,1.5*fontsize,3.6*fontsize])
+	height    = np.sum(heights)
 	
+	## Set bullet size of grid, depending of width, height and grid size
+	im.set_sizes([ 2 * min(width_ax,height_ax) / max(grid.nx,grid.ny) / pt ])
+	
+	## And now we set all width, height and ratios.
 	g.set_height_ratios(heights)
 	g.set_width_ratios(widths)
 	fig.set_figheight(height)
