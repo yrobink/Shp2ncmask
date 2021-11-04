@@ -47,6 +47,12 @@ Optional parameters
 
 --help
     Print the documentation.
+-lc (or --list-columns)
+    List the columns of the shapefile and quit.
+-dc (or --describe-column)
+    Describe values of a column.
+-s (or --select) [string and string]
+    Select a row of a column. Must be pass as '-s COL_NAME ROW_NAME'
 -m (or --method) [string] default is 'point'.
     Method used to build the mask. See the method section.
 --threshold [float] default is 0.8

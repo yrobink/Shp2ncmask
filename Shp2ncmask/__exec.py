@@ -43,6 +43,7 @@ def arguments( argv ):##{{{
 	"""
 	kwargs = {}
 	kwargs["help"]      = False
+	kwargs["col"]       = False
 	kwargs["method"]    = "point"
 	kwargs["threshold"] = 0.8
 	kwargs["iepsg"]     = "4326"
@@ -50,12 +51,26 @@ def arguments( argv ):##{{{
 	kwargs["fepsg"]     = "4326"
 	kwargs["ppe"]       = 100
 	
+	## Describe a column ?
+	dc = False
+	
 	## First transform arg in dict
 	##============================
 	read_index = []
 	for i,arg in enumerate(argv):
 		if arg in ["--help"]:
 			kwargs["help"] = True
+			read_index = read_index + [i]
+		if arg in ["-lc","--list-columns"]:
+			kwargs["col"] = True
+			read_index = read_index + [i]
+		if arg in ["-dc","--describe-column"]:
+			kwargs["row"] = argv[i+1]
+			dc = True
+			read_index = read_index + [i,i+1]
+		if arg in ["-s","--select"]:
+			kwargs["select"] = [argv[i+1],argv[i+2]]
+			read_index = read_index + [i,i+1,i+2]
 		if arg in ["-m","--method"]:
 			kwargs["method"] = argv[i+1]
 			read_index = read_index + [i,i+1]
@@ -87,16 +102,16 @@ def arguments( argv ):##{{{
 			kwargs["fepsg"] = argv[i+1]
 			read_index = read_index + [i,i+1]
 	
-	## Special case 1: user ask help
-	##==============================
-	if kwargs["help"]:
-		return kwargs,True
-	
 	## Check if all arguments are used
 	##================================
 	not_read_index = [ i for i in range(len(argv)) if i not in read_index]
 	if len(not_read_index) > 0:
 		print("""Warning: arguments '{}' not used.""".format("','".join([argv[i] for i in not_read_index])))
+	
+	## Special case 1: user ask help
+	##==============================
+	if kwargs["help"]:
+		return kwargs,True
 	
 	## Check arguments
 	##================
@@ -121,14 +136,16 @@ def arguments( argv ):##{{{
 	## Grid
 	try:
 		g = [float(x) for x in kwargs["grid"].split(",")]
-		if not len(g) == 6:
+		if not len(g) == 6 and (not kwargs["col"] or dc):
 			raise GridError( kwargs["grid"] )
 	except KeyError:
-		print( "Error: no grid given." )
-		arg_valid = False
+		if not kwargs["col"] and not dc:
+			print( "Error: no grid given." )
+			arg_valid = False
 	except ValueError:
-		print( """Error: at least one values of the grid '{}' is not castable to float.""".format(kwargs["grid"]) )
-		arg_valid = False
+		if not kwargs["col"] and not dc:
+			print( """Error: at least one values of the grid '{}' is not castable to float.""".format(kwargs["grid"]) )
+			arg_valid = False
 	except GridError as e:
 		print(e.message)
 		arg_valid = False
@@ -171,13 +188,14 @@ def arguments( argv ):##{{{
 		path = os.path.sep.join( kwargs["output"].split(os.path.sep)[:-1] )
 		if len(path) == 0: path = "."
 		ofile = kwargs["output"].split(os.path.sep)[-1]
-		if not os.path.isdir(path):
+		if not os.path.isdir(path) and not kwargs["col"]:
 			raise OFilePathError(path,kwargs["output"])
-		if not ofile.split(".")[-1] == "nc":
+		if not ofile.split(".")[-1] == "nc" and (not kwargs["col"] or dc):
 			raise OFileTypeError(ofile)
 	except KeyError:
-		print( "Error: no output file given." )
-		arg_valid = False
+		if not kwargs["col"] and not dc:
+			print( "Error: no output file given." )
+			arg_valid = False
 	except OFilePathError as e:
 		print(e.message)
 		arg_valid = False
@@ -241,18 +259,50 @@ def run( argv ):##{{{
 	
 	## Extract kwargs
 	##===============
-	method    = kwargs["method"]
-	threshold = kwargs["threshold"]
-	iepsg     = kwargs["iepsg"]
-	oepsg     = kwargs["oepsg"]
-	ifile     = kwargs["input"]
-	ofile     = kwargs["output"]
-	grid_par  = kwargs["grid"]
-	ppe       = kwargs["ppe"]
+	method    = kwargs.get("method")
+	threshold = kwargs.get("threshold")
+	iepsg     = kwargs.get("iepsg")
+	oepsg     = kwargs.get("oepsg")
+	ifile     = kwargs.get("input")
+	ofile     = kwargs.get("output")
+	grid_par  = kwargs.get("grid")
+	ppe       = kwargs.get("ppe")
+	select    = kwargs.get("select")
 	
 	## Read the shapefile
 	##===================
 	ish = gpd.read_file(ifile).set_crs( epsg = iepsg )
+	
+	## Select
+	##=======
+	if select is not None:
+		col,row = select
+		if col not in ish.columns:
+			sys.exit("Error: '{}' is not a column. Abort.")
+		ish = ish[ish[col] == row]
+		if ish.size == 0:
+			sys.exit("Error: data are empty after selection, maybe the row {} is not valid ? Abort.".format(row))
+	
+	## Special case 2
+	##===============
+	if kwargs["col"]:
+		print("Columns:")
+		for c in ish.columns:
+			print( "* {}".format(c) )
+		return
+	
+	## Special case 3
+	##===============
+	column = kwargs.get("row")
+	if column is not None:
+		try:
+			rows = ish[column]
+			print( "Column {}:".format(column) )
+			for r in rows:
+				print( "* {}".format(r) )
+		except KeyError:
+			print("The column '{}' is not valid, abort.\nSee the '--list-columns' option.".format(column))
+		sys.exit()
 	
 	## Build the grid
 	##===============

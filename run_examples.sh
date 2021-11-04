@@ -30,3 +30,7 @@ fi
 ./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_4326.nc -g -5,10,0.5,41,52,0.5 -oepsg 4326 -fig figures/control_4326.png -fepsg 4326
 ./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_27572.nc -g 60000,1196000,64000,1617000,2681000,64000 -oepsg 27572 -fig figures/control_27572_64km.png -fepsg 4326
 
+## Example for a selection, we want only the IDF. We start by print columns and rows, and the build the mask.
+./shp2ncmask.py -i data/gadm36_FRA_shp/gadm36_FRA_1.shp -lc
+./shp2ncmask.py -i data/gadm36_FRA_shp/gadm36_FRA_1.shp -dc NAME_1
+./shp2ncmask.py -i data/gadm36_FRA_shp/gadm36_FRA_1.shp -s NAME_1 'Île-de-France' -g 1.4,3.6,0.05,48.1,49.3,0.05 -o data/mask_test.nc -fig data/fig_test.png -fepsg 4326
