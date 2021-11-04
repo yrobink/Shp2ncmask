@@ -25,6 +25,7 @@ import pyproj
 
 import geopandas as gpd
 
+from .__doc        import doc_shp2ncmask
 from .__exceptions import *
 from .__grid       import Grid
 from .__mask       import build_mask
@@ -39,8 +40,9 @@ from .__plot       import build_figure
 def arguments( argv ):##{{{
 	
 	kwargs = {}
+	kwargs["help"]      = False
 	kwargs["method"]    = "point"
-	kwargs["threshold"] = 0.
+	kwargs["threshold"] = 0.8
 	kwargs["iepsg"]     = "4326"
 	kwargs["oepsg"]     = "4326"
 	kwargs["fepsg"]     = "4326"
@@ -50,6 +52,8 @@ def arguments( argv ):##{{{
 	##============================
 	read_index = []
 	for i,arg in enumerate(argv):
+		if arg in ["--help"]:
+			kwargs["help"] = True
 		if arg in ["-m","--method"]:
 			kwargs["method"] = argv[i+1]
 			read_index = read_index + [i,i+1]
@@ -81,6 +85,13 @@ def arguments( argv ):##{{{
 			kwargs["fepsg"] = argv[i+1]
 			read_index = read_index + [i,i+1]
 	
+	## Special case 1: user ask help
+	##==============================
+	if kwargs["help"]:
+		return kwargs,True
+	
+	## Check if all arguments are used
+	##================================
 	not_read_index = [ i for i in range(len(argv)) if i not in read_index]
 	if len(not_read_index) > 0:
 		print("""Warning: arguments '{}' not used.""".format("','".join([argv[i] for i in not_read_index])))
@@ -215,8 +226,16 @@ def run( argv ):##{{{
 	kwargs,arg_valid = arguments(argv)
 	
 	if not arg_valid:
-		sys.exit("Arguments not valid, abort.")
+		sys.exit("Arguments not valid, abort. Read the documentation with shp2ncmask.py --help")
 	
+	## Special case 1
+	##===============
+	if kwargs["help"]:
+		print(doc_shp2ncmask)
+		return
+	
+	## Extract kwargs
+	##===============
 	method    = kwargs["method"]
 	threshold = kwargs["threshold"]
 	iepsg     = kwargs["iepsg"]
