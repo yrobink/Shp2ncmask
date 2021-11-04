@@ -10,7 +10,7 @@ The first uses the command
 
 ~~~bash
 data_test=data/gadm36_FRA_shp/gadm36_FRA_0.shp
-./shp2ncmask -m weight -i $data_test -iepsg 4326 -o data/mask_4326.nc -g -5,10,0.5,41,52,0.5 -oepsg 4326 -fig figures/control_4326.png -fepsg 4326
+./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_4326.nc -g -5,10,0.5,41,52,0.5 -oepsg 4326 -fig figures/control_4326.png -fepsg 4326
 ~~~
 
 and produces the following mask:
@@ -21,7 +21,7 @@ The second uses the command:
 
 ~~~bash
 data_test=data/gadm36_FRA_shp/gadm36_FRA_0.shp
-./shp2ncmask -m weight -i $data_test -iepsg 4326 -o data/mask_27572.nc -g 60000,1196000,64000,1617000,2681000,64000 -oepsg 27572 -fig figures/control_27572_64km.png -fepsg 4326
+./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_27572.nc -g 60000,1196000,64000,1617000,2681000,64000 -oepsg 27572 -fig figures/control_27572_64km.png -fepsg 4326
 ~~~
 
 and produces the following mask:
