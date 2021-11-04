@@ -3,6 +3,20 @@
 Tools to transform a shapefile in a netcdf mask. The grid, input and output
 projections can be customized.
 
+## Requires
+
+The script use `python3`, and requires the following libraries:
+
+- numpy
+- xarray
+- netCDF4
+- pyproj
+- shapely
+- geopandas
+- matplotlib
+
+This script has been tested with a miniconda installation on the `conda-forge` channel.
+
 ## Documentation
 
 ### Parameters
