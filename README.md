@@ -12,27 +12,27 @@ projections can be customized.
 `-i` (or `--input`) [string]\
 &nbsp;&nbsp;&nbsp;&nbsp;The input shapefile.\
 `-o` (or `--output`) [string]\
-&nbsp;&nbsp;&nbsp;&nbsp;The output netcdf file.\
+&nbsp;&nbsp;&nbsp;&nbsp;The output netcdf file.
 
 
 ### Optional parameters
 
---help
-    Print the documentation.
--m (or --method) [string] default is 'point'.
-    Method used to build the mask. See the method section.
---threshold [float] default is 0.8
-    Threshold used by the method 'threshold'.
--iepsg (or --input-epsg) [int] default is 4326.
-    epsg code of the input shapefile.
--oepsg (or --output-epsg) [int] default is 4326.
-    epsg code of the output mask.
---point-per-edge [int] default is 100.
-    Point per edge, see grid section.
--fig (or --figure) [string]
-    File of a figure which plot the mask.
--fepsg (or --figure-epsg) default is 4326.
-    epsg code of the figure.
+`--help`\
+&nbsp;&nbsp;&nbsp;&nbsp;Print the documentation.\
+`-m` (or `--method`) [string] default is 'point'.\
+&nbsp;&nbsp;&nbsp;&nbsp;Method used to build the mask. See the method section.\
+`--threshold` [float] default is 0.8\
+&nbsp;&nbsp;&nbsp;&nbsp;Threshold used by the method 'threshold'.\
+`-iepsg` (or `--input-epsg`) [int] default is 4326.\
+&nbsp;&nbsp;&nbsp;&nbsp;epsg code of the input shapefile.\
+`-oepsg` (or `--output-epsg`) [int] default is 4326.\
+&nbsp;&nbsp;&nbsp;&nbsp;epsg code of the output mask.\
+`--point-per-edge` [int] default is 100.\
+&nbsp;&nbsp;&nbsp;&nbsp;Point per edge, see grid section.\
+`-fig` (or `--figure`) [string]\
+&nbsp;&nbsp;&nbsp;&nbsp;File of a figure which plot the mask.\
+`-fepsg` (or `--figure-epsg`) default is 4326.\
+&nbsp;&nbsp;&nbsp;&nbsp;epsg code of the figure.
 
 
 ### About epsg
@@ -49,7 +49,9 @@ projection. For example:
 ### Grid
 
 The grid is represented by 6 comma separated values taking the form:
-    -g xmin,xmax,dx,ymin,ymax,dy
+~~~bash
+-g xmin,xmax,dx,ymin,ymax,dy
+~~~
 where:
 - xmin is the min value of the x-axis,
 - xmax is the max value of the x-axis,
