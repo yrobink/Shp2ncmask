@@ -226,7 +226,7 @@ def run( argv ):##{{{
 	kwargs,arg_valid = arguments(argv)
 	
 	if not arg_valid:
-		sys.exit("Arguments not valid, abort. Read the documentation with shp2ncmask.py --help")
+		sys.exit("Arguments not valid, abort.\nRead the documentation with './shp2ncmask.py --help'.")
 	
 	## Special case 1
 	##===============
