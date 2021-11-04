@@ -65,6 +65,7 @@ Optional parameters
 
 About epsg
 ----------
+
 The EPSG (European Petroleum Survey Group) is a code to identify a cartographic
 projection. For example:
 - epsg:4326 is the classic latitude / longitude projection (also called WGS 84)
@@ -76,6 +77,7 @@ projection. For example:
 
 Grid
 ----
+
 The grid is represented by 6 comma separated values taking the form:
     -g xmin,xmax,dx,ymin,ymax,dy
 where:
@@ -142,6 +144,7 @@ along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
 Sources and author
 ------------------
+
 - Sources are available at https://github.com/yrobink/Shp2ncmask.
 - Author: Yoann Robin, yoann.robin.k@gmail.com
 
