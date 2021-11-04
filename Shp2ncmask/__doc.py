@@ -43,7 +43,7 @@ Optional parameters
 -------------------
 
 --help
-    Print this documentation
+    Print the documentation.
 -m (or --method) [string] default is 'point'.
     Method used to build the mask. See the method section.
 --threshold [float] default is 0.8
@@ -89,14 +89,14 @@ same for the y-axis).
 
 Note 2: To compute the area, cells are re-projected in the Mercator projection.
 Thus a cell defined by the four corners is again a cell in the Mercator
-projection, but not representes the area of the original projection. To overcome
-this problem, a cell is not defined by only its four cornes, but each edge of 
-each cell is defined by '--point-per-edge' points, equally spaced between the 
-corners. The default value of '--point-per-edge' is equal to 100.
+projection, but which not represente the area of the original projection. To
+overcome this problem, a cell is not defined by only its four corners, but each
+edge of each cell is defined by '--point-per-edge' points, equally spaced
+between the corners. The default value of '--point-per-edge' is equal to 100.
 
 
-Method
-------
+Methods
+-------
 
 'point'
     Each grid cell is represented by its center. The value is equal to 1 if the
@@ -106,16 +106,16 @@ Method
     The value of each grid cell is the percent of area defined by the
     intersection of the polygons of the shapefile and the cell.
 'threshold'
-    Start from the 'weight' mask, and all values greater than the '--threshold'
-    are replaced by 1, 0 otherwise.
+    Start from the 'weight' mask, all values greater than the '--threshold' are
+    replaced by 1, 0 otherwise.
 'interior'
-    Start from the 'weight' mask, and all values lower than 1 are replaced by 0.
-    This correspond to assign 1 only at cells inside the polygons defined by the
-    shapefile.
+    Start from the 'weight' mask, all values lower than 1 are replaced by 0.
+    This correspond to assign 1 only at cells inside the polygons defined by
+    the shapefile.
 'exterior'
-    Start from the 'weight' mask, and all values greater than 0 are replaced by
-    1.  This correspond to assign 0 only at cells outside the polygons defined
-    by the shapefile.
+    Start from the 'weight' mask, all values greater than 0 are replaced by 1.
+    This correspond to assign 0 only at cells outside the polygons defined by
+    the shapefile.
 
 
 License
@@ -139,8 +139,7 @@ along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
 Sources and author
 ------------------
-Sources are available at https://github.com/yrobink/Shp2ncmask.
-Author: Yoann Robin, yoann.robin.k@gmail.com 
-
+- Sources are available at https://github.com/yrobink/Shp2ncmask.
+- Author: Yoann Robin, yoann.robin.k@gmail.com 
 """
 
