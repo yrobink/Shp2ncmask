@@ -8,11 +8,11 @@ projections can be customized.
 ### Parameters
 
 `-g` (or `--grid`) [comma separated float]\
-&nbsp;&nbsp;&nbsp;&nbsp;Grid used. See the grid section.
-`-i` (or `--input`) [string]
-    The input shapefile.
-`-o` (or `--output`) [string]
-    The output netcdf file.
+&nbsp;&nbsp;&nbsp;&nbsp;Grid used. See the grid section.\
+`-i` (or `--input`) [string]\
+&nbsp;&nbsp;&nbsp;&nbsp;The input shapefile.\
+`-o` (or `--output`) [string]\
+&nbsp;&nbsp;&nbsp;&nbsp;The output netcdf file.\
 
 
 ### Optional parameters
