@@ -73,15 +73,15 @@ between the corners. The default value of `'--point-per-edge'` is equal to 100.
 
 ### Methods
 
-`'point'`
-&nbsp;&nbsp;&nbsp;&nbsp;Each grid cell is represented by its center. The value is equal to 1 if the center is in the interior of the polygons defined by the shapefile, 0 otherwise.
-`'weight'`
-&nbsp;&nbsp;&nbsp;&nbsp;The value of each grid cell is the percent of area defined by the intersection of the polygons of the shapefile and the cell.
-`'threshold'`
-&nbsp;&nbsp;&nbsp;&nbsp;Start from the 'weight' mask, all values greater than the '--threshold' are replaced by 1, 0 otherwise.
-`'interior'`
-&nbsp;&nbsp;&nbsp;&nbsp;Start from the 'weight' mask, all values lower than 1 are replaced by 0. This correspond to assign 1 only at cells inside the polygons defined by the shapefile.
-`'exterior'`
+`'point'`\
+&nbsp;&nbsp;&nbsp;&nbsp;Each grid cell is represented by its center. The value is equal to 1 if the center is in the interior of the polygons defined by the shapefile, 0 otherwise.\
+`'weight'`\
+&nbsp;&nbsp;&nbsp;&nbsp;The value of each grid cell is the percent of area defined by the intersection of the polygons of the shapefile and the cell.\
+`'threshold'`\
+&nbsp;&nbsp;&nbsp;&nbsp;Start from the 'weight' mask, all values greater than the '--threshold' are replaced by 1, 0 otherwise.\
+`'interior'`\
+&nbsp;&nbsp;&nbsp;&nbsp;Start from the 'weight' mask, all values lower than 1 are replaced by 0. This correspond to assign 1 only at cells inside the polygons defined by the shapefile.\
+`'exterior'`\
 &nbsp;&nbsp;&nbsp;&nbsp;Start from the 'weight' mask, all values greater than 0 are replaced by 1. This correspond to assign 0 only at cells outside the polygons defined by the shapefile.
 
 ## Examples
