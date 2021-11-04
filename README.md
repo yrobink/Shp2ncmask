@@ -53,23 +53,23 @@ The grid is represented by 6 comma separated values taking the form:
 -g xmin,xmax,dx,ymin,ymax,dy
 ~~~
 where:
-- xmin is the min value of the x-axis,
-- xmax is the max value of the x-axis,
-- dx is the step between xmin and xmax,
-- ymin is the min value of the y-axis,
-- ymax is the max value of the y-axis,
-- dy is the step between xmin and xmax.
+- `xmin` is the min value of the x-axis,
+- `xmax` is the max value of the x-axis,
+- `dx` is the step between xmin and xmax,
+- `ymin` is the min value of the y-axis,
+- `ymax` is the max value of the y-axis,
+- `dy` is the step between xmin and xmax.
 
-Note 1: The first point of the x-axis is xmin, but the last point is the
-maximal value of the form 'xmin + N * dx' lower than 'xmax + dx / 2' (and the
+Note 1: The first point of the x-axis is `xmin`, but the last point is the
+maximal value of the form `'xmin + N * dx'` lower than `'xmax + dx / 2'` (and the
 same for the y-axis).
 
 Note 2: To compute the area, cells are re-projected in the Mercator projection.
 Thus a cell defined by the four corners is again a cell in the Mercator
 projection, but which not represente the area of the original projection. To
 overcome this problem, a cell is not defined by only its four corners, but each
-edge of each cell is defined by '--point-per-edge' points, equally spaced
-between the corners. The default value of '--point-per-edge' is equal to 100.
+edge of each cell is defined by `'--point-per-edge'` points, equally spaced
+between the corners. The default value of `'--point-per-edge'` is equal to 100.
 
 
 ### Methods
