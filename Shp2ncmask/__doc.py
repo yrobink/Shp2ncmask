@@ -131,6 +131,14 @@ Methods
     the shapefile.
 
 
+Shapefile sources
+-----------------
+
+Two (not exhaustive) sources of shapefile are Natural Earth and GADM-3.6:
+- https://www.naturalearthdata.com/
+- https://gadm.org/download_country_v3.html
+
+
 License
 -------
 

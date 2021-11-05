@@ -106,6 +106,13 @@ between the corners. The default value of `'--point-per-edge'` is equal to 100.
 `'exterior'`\
 &nbsp;&nbsp;&nbsp;&nbsp;Start from the 'weight' mask, all values greater than 0 are replaced by 1. This correspond to assign 0 only at cells outside the polygons defined by the shapefile.
 
+## Shapefile sources
+
+Two (not exhaustive) sources of shapefile are Natural Earth and GADM-3.6:
+- [https://www.naturalearthdata.com/](https://www.naturalearthdata.com/)
+- [https://gadm.org/download_country_v3.html](https://gadm.org/download_country_v3.html)
+
+
 ## Examples
 
 ### Metropolitan France in lat/lon projection
