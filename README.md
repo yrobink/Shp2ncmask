@@ -33,6 +33,14 @@ This script has been tested with a miniconda installation on the `conda-forge` c
 
 `--help`\
 &nbsp;&nbsp;&nbsp;&nbsp;Print the documentation.\
+`-b` (or `--bounds`)\
+&nbsp;&nbsp;&nbsp;&nbsp;Print the bounds of input file and quit. Can be used with `'-s'` and `'-iepsg'`.\
+`-lc` (or `--list-columns`)\
+&nbsp;&nbsp;&nbsp;&nbsp;List the columns of the shapefile and quit.\
+`-dc` (or `--describe-column`)\
+&nbsp;&nbsp;&nbsp;&nbsp;Describe values of a column.\
+`-s` (or `--select`) [string and string]\
+&nbsp;&nbsp;&nbsp;&nbsp;Select a row of a column. Must be pass as `'-s COL_NAME ROW_NAME'`\
 `-m` (or `--method`) [string] default is 'point'.\
 &nbsp;&nbsp;&nbsp;&nbsp;Method used to build the mask. See the method section.\
 `--threshold` [float] default is 0.8\
@@ -100,30 +108,48 @@ between the corners. The default value of `'--point-per-edge'` is equal to 100.
 
 ## Examples
 
-Two examples are given in the file `run_examples`.
-
-The first uses the command
+### Metropolitan France in lat/lon projection
 
 ~~~bash
 data_test=data/gadm36_FRA_shp/gadm36_FRA_0.shp
 ./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_4326.nc -g -5,10,0.5,41,52,0.5 -oepsg 4326 -fig figures/control_4326.png -fepsg 4326
 ~~~
 
-and produces the following mask:
-
 ![Alt](/figures/control_4326.png)
 
-The second uses the command:
+### Metropolitan France in LambertII projection
 
 ~~~bash
 data_test=data/gadm36_FRA_shp/gadm36_FRA_0.shp
 ./shp2ncmask.py -m weight -i $data_test -iepsg 4326 -o data/mask_27572.nc -g 60000,1196000,64000,1617000,2681000,64000 -oepsg 27572 -fig figures/control_27572_64km.png -fepsg 4326
 ~~~
 
-and produces the following mask:
-
 ![Alt](/figures/control_27572_64km.png)
 
+### Ile-de-France region from metropolitan France in lat/lon projection
+
+~~~bash
+## We print the columns, rows, select to find bounds and we build the mask.
+data_test=data/gadm36_FRA_shp/gadm36_FRA_1.shp
+./shp2ncmask.py -i $data_test -lc ## --list--columns
+./shp2ncmask.py -i $data_test -dc NAME_1 ## --describe-column
+./shp2ncmask.py -i $data_test -s NAME_1 'Île-de-France' -b
+./shp2ncmask.py -m weight -i $data_test -s NAME_1 'Île-de-France' -g 1.4,3.6,0.05,48.1,49.3,0.05 -o data/mask_IDF_4326.nc -fig figures/control_IDF_4326.png -fepsg 4326
+~~~
+
+![Alt](/figures/control_IDF_4326.png)
+
+
+### Ile-de-France region from metropolitan France in LambertII projection
+
+~~~bash
+## The last is also the IDF, but in LambertII coordinates, so we change the input epsg to find the bounds
+data_test=data/gadm36_FRA_shp/gadm36_FRA_1.shp
+./shp2ncmask.py -i $data_test -s NAME_1 'Île-de-France' -iepsg 27572 -b
+./shp2ncmask.py -m weight -i $data_test -s NAME_1 'Île-de-France' -g 534000,700000,8000,2340000,2480000,8000 -o data/mask_IDF_27572.nc -oepsg 27572 -fig figures/control_IDF_27572_8km.png -fepsg 4326
+~~~
+
+![Alt](/figures/control_IDF_27572_8km.png)
 
 
 ## License
