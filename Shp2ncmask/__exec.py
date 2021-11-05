@@ -44,6 +44,7 @@ def arguments( argv ):##{{{
 	kwargs = {}
 	kwargs["help"]      = False
 	kwargs["col"]       = False
+	kwargs["bounds"]    = False
 	kwargs["method"]    = "point"
 	kwargs["threshold"] = 0.8
 	kwargs["iepsg"]     = "4326"
@@ -60,6 +61,9 @@ def arguments( argv ):##{{{
 	for i,arg in enumerate(argv):
 		if arg in ["--help"]:
 			kwargs["help"] = True
+			read_index = read_index + [i]
+		if arg in ["-b","--bounds"]:
+			kwargs["bounds"] = True
 			read_index = read_index + [i]
 		if arg in ["-lc","--list-columns"]:
 			kwargs["col"] = True
@@ -117,53 +121,11 @@ def arguments( argv ):##{{{
 	##================
 	arg_valid = True
 	
-	## Method
-	l_method  = ["point","weight","threshold","interior","exterior"]
-	try:
-		if kwargs["method"] not in l_method:
-			raise MethodError( kwargs["method"] , l_method )
-	except MethodError as e:
-		print(e.message)
-		arg_valid = False
-	
-	## threshold
-	try:
-		kwargs["threshold"] = float(kwargs["threshold"])
-	except ValueError:
-		print( """Error: the threshold '{}' is not castable to float.""".format(kwargs["threshold"]) )
-		arg_valid = False
-	
-	## Grid
-	try:
-		g = [float(x) for x in kwargs["grid"].split(",")]
-		if not len(g) == 6 and (not kwargs["col"] or dc):
-			raise GridError( kwargs["grid"] )
-	except KeyError:
-		if not kwargs["col"] and not dc:
-			print( "Error: no grid given." )
-			arg_valid = False
-	except ValueError:
-		if not kwargs["col"] and not dc:
-			print( """Error: at least one values of the grid '{}' is not castable to float.""".format(kwargs["grid"]) )
-			arg_valid = False
-	except GridError as e:
-		print(e.message)
-		arg_valid = False
-	else:
-		kwargs["grid"] = [g[:3],g[3:]]
-	
 	## input epsg
 	try:
 		p = pyproj.Proj("epsg:{}".format(kwargs["iepsg"]))
 	except pyproj.crs.CRSError:
 		print("Error: input epsg:{} is not valid".format(kwargs["iepsg"]))
-		arg_valid = False
-	
-	## output epsg
-	try:
-		p = pyproj.Proj("epsg:{}".format(kwargs["oepsg"]))
-	except pyproj.crs.CRSError:
-		print("Error: output epsg:{} is not valid".format(kwargs["oepsg"]))
 		arg_valid = False
 	
 	## input file
@@ -183,6 +145,52 @@ def arguments( argv ):##{{{
 		print(e.message)
 		arg_valid = False
 	
+	## Special case: list/describe columns or bounds
+	if kwargs["col"] or dc or kwargs["bounds"]:
+		return kwargs,arg_valid
+	
+	## Method
+	l_method  = ["point","weight","threshold","interior","exterior"]
+	try:
+		if kwargs["method"] not in l_method:
+			raise MethodError( kwargs["method"] , l_method )
+	except MethodError as e:
+		print(e.message)
+		arg_valid = False
+	
+	## threshold
+	try:
+		kwargs["threshold"] = float(kwargs["threshold"])
+	except ValueError:
+		print( """Error: the threshold '{}' is not castable to float.""".format(kwargs["threshold"]) )
+		arg_valid = False
+	
+	## Grid
+	try:
+		g = [float(x) for x in kwargs["grid"].split(",")]
+		if not len(g) == 6:
+			raise GridError( kwargs["grid"] )
+	except KeyError:
+		if not kwargs["col"]:
+			print( "Error: no grid given." )
+			arg_valid = False
+	except ValueError:
+		if not kwargs["col"]:
+			print( """Error: at least one values of the grid '{}' is not castable to float.""".format(kwargs["grid"]) )
+			arg_valid = False
+	except GridError as e:
+		print(e.message)
+		arg_valid = False
+	else:
+		kwargs["grid"] = [g[:3],g[3:]]
+	
+	## output epsg
+	try:
+		p = pyproj.Proj("epsg:{}".format(kwargs["oepsg"]))
+	except pyproj.crs.CRSError:
+		print("Error: output epsg:{} is not valid".format(kwargs["oepsg"]))
+		arg_valid = False
+	
 	## output file
 	try:
 		path = os.path.sep.join( kwargs["output"].split(os.path.sep)[:-1] )
@@ -190,10 +198,10 @@ def arguments( argv ):##{{{
 		ofile = kwargs["output"].split(os.path.sep)[-1]
 		if not os.path.isdir(path) and not kwargs["col"]:
 			raise OFilePathError(path,kwargs["output"])
-		if not ofile.split(".")[-1] == "nc" and (not kwargs["col"] or dc):
+		if not ofile.split(".")[-1] == "nc":
 			raise OFileTypeError(ofile)
 	except KeyError:
-		if not kwargs["col"] and not dc:
+		if not kwargs["col"]:
 			print( "Error: no output file given." )
 			arg_valid = False
 	except OFilePathError as e:
@@ -271,17 +279,29 @@ def run( argv ):##{{{
 	
 	## Read the shapefile
 	##===================
-	ish = gpd.read_file(ifile).set_crs( epsg = iepsg )
+	ish = gpd.read_file(ifile)
+	if not ish.crs.to_epsg() == iepsg:
+		ish = ish.to_crs( epsg = iepsg )
 	
 	## Select
 	##=======
 	if select is not None:
 		col,row = select
 		if col not in ish.columns:
-			sys.exit("Error: '{}' is not a column. Abort.")
+			sys.exit("Error: '{}' is not a column. Abort.".format(col))
 		ish = ish[ish[col] == row]
 		if ish.size == 0:
 			sys.exit("Error: data are empty after selection, maybe the row {} is not valid ? Abort.".format(row))
+	
+	## Bounds
+	##=======
+	if kwargs["bounds"]:
+		print( "Bounds:" )
+		print( "* xmin: {:.6f}".format(ish.bounds["minx"].min()) )
+		print( "* xmax: {:.6f}".format(ish.bounds["maxx"].max()) )
+		print( "* ymin: {:.6f}".format(ish.bounds["miny"].min()) )
+		print( "* ymax: {:.6f}".format(ish.bounds["maxy"].max()) )
+		return
 	
 	## Special case 2
 	##===============

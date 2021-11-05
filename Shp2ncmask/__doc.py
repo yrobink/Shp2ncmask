@@ -34,10 +34,10 @@ are proposed, and the input/output projections can be customized.
 Parameters
 ----------
 
--g (or --grid) [comma separated float]
-    Grid used. See the grid section.
 -i (or --input) [string]
     The input shapefile.
+-g (or --grid) [comma separated float]
+    Grid used. See the grid section.
 -o (or --output) [string]
     The output netcdf file.
 
@@ -47,6 +47,8 @@ Optional parameters
 
 --help
     Print the documentation.
+-b (or --bounds)
+    Print the bounds of input file and quit. Can be used with '-s' and '-iepsg'.
 -lc (or --list-columns)
     List the columns of the shapefile and quit.
 -dc (or --describe-column)
