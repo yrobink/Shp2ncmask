@@ -247,14 +247,14 @@ def arguments( argv ):##{{{
 	return kwargs,arg_valid
 ##}}}
 
-def run( argv ):##{{{
+def start_shp2ncmask():##{{{
 	"""
 	Toolchain.
 	"""
 	
 	## Read args
 	##==========
-	kwargs,arg_valid = arguments(argv)
+	kwargs,arg_valid = arguments(sys.argv[1:])
 	
 	if not arg_valid:
 		sys.exit("Arguments not valid, abort.\nRead the documentation with './shp2ncmask.py --help'.")

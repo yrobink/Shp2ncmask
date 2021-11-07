@@ -22,7 +22,7 @@
 ###############
 
 import sys
-from Shp2ncmask import run
+from Shp2ncmask import start_shp2ncmask
 
 
 ##########
@@ -31,6 +31,6 @@ from Shp2ncmask import run
 
 if __name__ == "__main__":
 	
-	run(sys.argv[1:])
+	start_shp2ncmask()
 	
 	sys.exit()

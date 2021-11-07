@@ -23,4 +23,4 @@
 from .__version import version
 __version__ = version
 
-from .__exec import run
+from .__exec import start_shp2ncmask
