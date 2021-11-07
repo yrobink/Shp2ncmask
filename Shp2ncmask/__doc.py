@@ -17,6 +17,9 @@
 ## along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
 from .__release import version
+from .__release import author_doc
+from .__release import license
+from .__release import src_url
 
 
 doc_shp2ncmask = """
@@ -139,8 +142,8 @@ Two (not exhaustive) sources of shapefile are Natural Earth and GADM-3.6:
 - https://gadm.org/download_country_v3.html
 
 
-License
--------
+License {}
+-------{}
 
 Copyright(c) 2021 Yoann Robin
 
@@ -161,9 +164,9 @@ along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 Sources and author
 ------------------
 
-- Sources are available at https://github.com/yrobink/Shp2ncmask.
-- Author: Yoann Robin, yoann.robin.k@gmail.com
+- Sources are available at {}.
+- Author(s): {}.
 
 version {}
-""".format(version)
+""".format(license,"-"*(len(license)+1),src_url,author_doc,version)
 

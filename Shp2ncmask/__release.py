@@ -16,10 +16,40 @@
 ## You should have received a copy of the GNU General Public License
 ## along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
+
 version_major = 0
 version_minor = 3
 version_patch = 0
 version_extra = ""
+version       = "{}.{}.{}{}".format(version_major,version_minor,version_patch,version_extra)
 
-version = "{}.{}.{}{}".format(version_major,version_minor,version_patch,version_extra)
+
+##
+
+name = "shp2ncmask"
+
+
+##
+
+description      = ""
+long_description = \
+"""
+"""
+
+
+##
+
+license = "GNU-GPL3"
+
+
+##
+
+authors      = ["Yoann Robin"]
+authors_mail = ["yoann.robin.k@gmail.com"]
+author_doc   = ", ".join( [ ath + " ({})".format(athm) for ath,athm in zip(authors,authors_mail) ] )
+
+
+##
+
+src_url = "https://github.com/yrobink/Shp2ncmask"
 
