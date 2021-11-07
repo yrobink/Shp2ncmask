@@ -110,7 +110,7 @@ def arguments( argv ):##{{{
 	##================================
 	not_read_index = [ i for i in range(len(argv)) if i not in read_index]
 	if len(not_read_index) > 0:
-		print("""Warning: arguments '{}' not used.""".format("','".join([argv[i] for i in not_read_index])))
+		print( "Warning: arguments '{}' not used.".format("','".join([argv[i] for i in not_read_index])), file = sys.stderr )
 	
 	## Special case 1: user ask help
 	##==============================
@@ -125,7 +125,7 @@ def arguments( argv ):##{{{
 	try:
 		p = pyproj.Proj("epsg:{}".format(kwargs["iepsg"]))
 	except pyproj.crs.CRSError:
-		print("Error: input epsg:{} is not valid".format(kwargs["iepsg"]))
+		print( "Error: input epsg:{} is not valid".format(kwargs["iepsg"]) , file = sys.stderr )
 		arg_valid = False
 	
 	## input file
@@ -136,13 +136,13 @@ def arguments( argv ):##{{{
 		if not ifileext == "shp":
 			raise OFileType(kwargs["input"])
 	except KeyError:
-		print( "Error: no input file given." )
+		print( "Error: no input file given." , file = sys.stderr )
 		arg_valid = False
 	except IFileError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	except IFileTypeError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	
 	## Special case: list/describe columns or bounds
@@ -155,14 +155,14 @@ def arguments( argv ):##{{{
 		if kwargs["method"] not in l_method:
 			raise MethodError( kwargs["method"] , l_method )
 	except MethodError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	
 	## threshold
 	try:
 		kwargs["threshold"] = float(kwargs["threshold"])
 	except ValueError:
-		print( """Error: the threshold '{}' is not castable to float.""".format(kwargs["threshold"]) )
+		print( "Error: the threshold '{}' is not castable to float.".format(kwargs["threshold"]) , file = sys.stderr )
 		arg_valid = False
 	
 	## Grid
@@ -172,14 +172,14 @@ def arguments( argv ):##{{{
 			raise GridError( kwargs["grid"] )
 	except KeyError:
 		if not kwargs["col"]:
-			print( "Error: no grid given." )
+			print( "Error: no grid given." , file = sys.stderr )
 			arg_valid = False
 	except ValueError:
 		if not kwargs["col"]:
-			print( """Error: at least one values of the grid '{}' is not castable to float.""".format(kwargs["grid"]) )
+			print( "Error: at least one values of the grid '{}' is not castable to float.".format(kwargs["grid"]) , file = sys.stderr )
 			arg_valid = False
 	except GridError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	else:
 		kwargs["grid"] = [g[:3],g[3:]]
@@ -188,7 +188,7 @@ def arguments( argv ):##{{{
 	try:
 		p = pyproj.Proj("epsg:{}".format(kwargs["oepsg"]))
 	except pyproj.crs.CRSError:
-		print("Error: output epsg:{} is not valid".format(kwargs["oepsg"]))
+		print( "Error: output epsg:{} is not valid".format(kwargs["oepsg"]) , file = sys.stderr )
 		arg_valid = False
 	
 	## output file
@@ -202,13 +202,13 @@ def arguments( argv ):##{{{
 			raise OFileTypeError(ofile)
 	except KeyError:
 		if not kwargs["col"]:
-			print( "Error: no output file given." )
+			print( "Error: no output file given." , file = sys.stderr )
 			arg_valid = False
 	except OFilePathError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	except OFileTypeError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	
 	## Point per edge
@@ -217,10 +217,10 @@ def arguments( argv ):##{{{
 		if kwargs["ppe"] < 2:
 			raise PpeValueError(kwargs["ppe"])
 	except ValueError:
-		print( """Error: the point-per-edge parameter '{}' is not castable to int.""".format(kwargs["ppe"]) )
+		print( "Error: the point-per-edge parameter '{}' is not castable to int.".format(kwargs["ppe"]) , file = sys.stderr )
 		arg_valid = False
 	except PpeValueError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	
 	## output fig file
@@ -234,14 +234,14 @@ def arguments( argv ):##{{{
 		## If not in kwargs, no plot
 		pass
 	except OFilePathError as e:
-		print(e.message)
+		print( e.message , file = sys.stderr )
 		arg_valid = False
 	
 	## output figure epsg
 	try:
 		p = pyproj.Proj("epsg:{}".format(kwargs["fepsg"]))
 	except pyproj.crs.CRSError:
-		print("Error: plot epsg:{} is not valid".format(kwargs["fepsg"]))
+		print( "Error: plot epsg:{} is not valid".format(kwargs["fepsg"]) , file = sys.stderr )
 		arg_valid = False
 	
 	return kwargs,arg_valid
@@ -257,13 +257,14 @@ def start_shp2ncmask():##{{{
 	kwargs,arg_valid = arguments(sys.argv[1:])
 	
 	if not arg_valid:
-		sys.exit("Arguments not valid, abort.\nRead the documentation with './shp2ncmask.py --help'.")
+		print( "Arguments not valid, abort.\nTry './shp2ncmask.py --help'." , file = sys.stderr )
+		return 1
 	
 	## Special case 1
 	##===============
 	if kwargs["help"]:
 		print(doc_shp2ncmask)
-		return
+		return 0
 	
 	## Extract kwargs
 	##===============
@@ -288,10 +289,12 @@ def start_shp2ncmask():##{{{
 	if select is not None:
 		col,row = select
 		if col not in ish.columns:
-			sys.exit("Error: '{}' is not a column. Abort.".format(col))
+			print( "Error: '{}' is not a column. Abort.".format(col) , file = sys.stderr )
+			sys.exit(1)
 		ish = ish[ish[col] == row]
 		if ish.size == 0:
-			sys.exit("Error: data are empty after selection, maybe the row {} is not valid ? Abort.".format(row))
+			print( "Error: data are empty after selection, maybe the row {} is not valid ? Abort.".format(row) , file = sys.stderr )
+			sys.exit(1)
 	
 	## Bounds
 	##=======
@@ -301,7 +304,7 @@ def start_shp2ncmask():##{{{
 		print( "* xmax: {:.6f}".format(ish.bounds["maxx"].max()) )
 		print( "* ymin: {:.6f}".format(ish.bounds["miny"].min()) )
 		print( "* ymax: {:.6f}".format(ish.bounds["maxy"].max()) )
-		return
+		sys.exit()
 	
 	## Special case 2
 	##===============
@@ -309,7 +312,7 @@ def start_shp2ncmask():##{{{
 		print("Columns:")
 		for c in ish.columns:
 			print( "* {}".format(c) )
-		return
+		sys.exit()
 	
 	## Special case 3
 	##===============
@@ -321,7 +324,8 @@ def start_shp2ncmask():##{{{
 			for r in rows:
 				print( "* {}".format(r) )
 		except KeyError:
-			print("The column '{}' is not valid, abort.\nSee the '--list-columns' option.".format(column))
+			print( "The column '{}' is not valid, abort.\nSee the '--list-columns' option.".format(column) , file = sys.stderr )
+			sys.exit(1)
 		sys.exit()
 	
 	## Build the grid
@@ -343,6 +347,7 @@ def start_shp2ncmask():##{{{
 	if figf is not None:
 		build_figure( figf , kwargs["fepsg"] , oepsg , grid , ish , mask , method )
 	
+	sys.exit()
 ##}}}
 
 

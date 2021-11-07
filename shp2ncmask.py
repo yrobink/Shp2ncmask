@@ -21,7 +21,6 @@
 ## Libraries ##
 ###############
 
-import sys
 from Shp2ncmask import start_shp2ncmask
 
 
@@ -30,7 +29,4 @@ from Shp2ncmask import start_shp2ncmask
 ##########
 
 if __name__ == "__main__":
-	
 	start_shp2ncmask()
-	
-	sys.exit()
