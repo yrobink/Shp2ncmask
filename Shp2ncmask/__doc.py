@@ -16,7 +16,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
-from .__version import version
+from .__release import version
 
 
 doc_shp2ncmask = """

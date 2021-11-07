@@ -25,7 +25,7 @@ import numpy     as np
 import xarray    as xr
 import geopandas as gpd
 
-from .__version import version
+from .__release import version
 
 ###############
 ## Functions ##

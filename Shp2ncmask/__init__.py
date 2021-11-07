@@ -20,7 +20,7 @@
 ## Imports ##
 #############
 
-from .__version import version
+from .__release import version
 __version__ = version
 
 from .__exec import start_shp2ncmask
