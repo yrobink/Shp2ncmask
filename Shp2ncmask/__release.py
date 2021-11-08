@@ -44,9 +44,9 @@ license = "GNU-GPL3"
 
 ##
 
-authors      = ["Yoann Robin"]
-authors_mail = ["yoann.robin.k@gmail.com"]
-author_doc   = ", ".join( [ ath + " ({})".format(athm) for ath,athm in zip(authors,authors_mail) ] )
+authors       = ["Yoann Robin"]
+authors_email = ["yoann.robin.k@gmail.com"]
+author_doc    = ", ".join( [ ath + " ({})".format(athm) for ath,athm in zip(authors,authors_email) ] )
 
 
 ##
