@@ -47,9 +47,8 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	mpl.rcParams['ytick.major.width'] = 0.5
 	
 	## Colormap
-	n_step = 20
-	cmap_i = plt.cm.turbo
-	cmap   = mplc.ListedColormap( cmap_i(np.linspace(0.1,0.9,n_step)) )
+	cmap   = mplc.ListedColormap( plt.cm.Blues(np.linspace(0.2,1,256)) )
+	norm   = mplc.BoundaryNorm( np.linspace(0,1,11) , 256 )
 	
 	## Coordinates
 	if str(grid.pt.crs.to_epsg()) == fepsg:
@@ -65,7 +64,7 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	ax  = fig.add_subplot(g[1,1])
 	ish.to_crs(epsg=fepsg).plot( ax = ax  , facecolor = "none" , edgecolor = "black" )
 	grid.sq.to_crs(epsg=fepsg).plot( ax = ax , facecolor = "none" , edgecolor = "red" )
-	im = ax.scatter( XY[:,0] , XY[:,1] , c = np.floor( n_step * mask.ravel() ) / n_step , cmap = cmap )
+	im = ax.scatter( XY[:,0] , XY[:,1] , c = mask.ravel() , cmap = cmap , norm = norm )
 	plt.yticks(rotation = 90)
 	if fepsg == "4326":
 		ax.set_xlabel( r"Longitude" )
