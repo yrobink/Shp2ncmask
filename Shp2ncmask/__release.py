@@ -17,10 +17,10 @@
 ## along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
 
-version_major = 0
-version_minor = 3
-version_patch = 1
-version_extra = ""
+version_major = 1
+version_minor = 0
+version_patch = 0
+version_extra = "b1"
 version       = "{}.{}.{}{}".format(version_major,version_minor,version_patch,version_extra)
 
 
