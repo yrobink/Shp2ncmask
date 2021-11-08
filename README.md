@@ -5,7 +5,7 @@ projections can be customized.
 
 ## Requires
 
-The script use `python3`, and requires the following libraries:
+The script uses `python3`, and requires the following libraries:
 
 - numpy
 - xarray
