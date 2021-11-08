@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 ## Copyright(c) 2021 Yoann Robin
 ## 
@@ -16,42 +17,16 @@
 ## You should have received a copy of the GNU General Public License
 ## along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
+###############
+## Libraries ##
+###############
 
-version_major = 0
-version_minor = 3
-version_patch = 1
-version_extra = ""
-version       = "{}.{}.{}{}".format(version_major,version_minor,version_patch,version_extra)
-
-
-##
-
-name = "shp2ncmask"
+from Shp2ncmask import start_shp2ncmask
 
 
-##
+##########
+## main ##
+##########
 
-description      = "shp2ncmask is a tools to transform a shapefile in a netcdf file"
-long_description = \
-"""
-shp2ncmask is a tools to transform a shapefile in a netcdf file. Several methods
-are proposed, and the input/output projections can be customized.
-"""
-
-
-##
-
-license = "GNU-GPL3"
-
-
-##
-
-authors       = ["Yoann Robin"]
-authors_email = ["yoann.robin.k@gmail.com"]
-author_doc    = ", ".join( [ ath + " ({})".format(athm) for ath,athm in zip(authors,authors_email) ] )
-
-
-##
-
-src_url = "https://github.com/yrobink/Shp2ncmask"
-
+if __name__ == "__main__":
+	start_shp2ncmask()
