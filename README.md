@@ -18,9 +18,15 @@ The script use `python3`, and requires the following libraries:
 This script has been tested with a miniconda installation on the `conda-forge`
 channel, and on the python installation of ubuntu 20.04 LTS.
 
-## Documentation
+## Installation and documentation
 
-Just run in command line to read the documentation:
+Start by install with the command:
+
+~~~bash
+python3 setup.py install
+~~~
+
+and just run the following command to access to the documentation:
 
 ~~~bash
 ./shp2ncmask --help
