@@ -33,13 +33,13 @@ author_email     = ", ".join(authors_email)
 packages         = ["Shp2ncmask"]
 package_dir      = { "Shp2ncmask" : "Shp2ncmask" }
 scripts          = ["scripts/shp2ncmask"]
-requires         = [ "numpy",
-					 "xarray",
-					 "netCDF4",
-					 "pyproj",
-					 "shapely",
-					 "geopandas",
-					 "matplotlib"]
+requires         = [ "numpy (>=1.17)",
+					 "xarray (>=0.15)",
+					 "netCDF4 (>=1.5)",
+					 "pyproj (>=2.5)",
+					 "shapely (>=1.7)",
+					 "geopandas (>=0.7)",
+					 "matplotlib (>=3.1)"]
 keywords         = ["shapefile","netcdf","mask"]
 platforms        = ["linux","macosx"]
 classifiers      = ["Development Status :: 4 - Beta",
