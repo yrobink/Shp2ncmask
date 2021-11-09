@@ -16,7 +16,7 @@ The script uses `python3`, and requires the following libraries:
 - matplotlib
 
 This script has been tested with a miniconda installation on the `conda-forge`
-channel, and on the python installation of ubuntu 20.04 LTS.
+channel, and on the python installation of ubuntu 20.04.3 LTS.
 
 ## Installation and documentation
 
@@ -32,6 +32,11 @@ and just run the following command to access to the documentation:
 shp2ncmask --help
 ~~~
 
+All examples below can be reproduced by running:
+
+~~~bash
+./run_examples.sh
+~~~
 
 ## Examples
 
