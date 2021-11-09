@@ -35,8 +35,6 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	"""
 	Plot function of the mask
 	"""
-	
-	mpl_params = dict(mpl.rcParams)
 	mpl.rcdefaults()
 	mpl.rcParams['font.size'] = 7
 	mpl.rcParams['axes.linewidth'] = 0.5
@@ -101,9 +99,13 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	width_ax = width - (3.8*fontsize + 2*axeslw)
 	widths   = np.array([3.8*fontsize , width_ax ,2*axeslw])
 	
-	height_ax = width_ax * ax.get_data_ratio() * ax.get_aspect()
-	heights   = np.array([2*fontsize,height_ax,4.5*fontsize,1.5*fontsize,3.6*fontsize])
-	height    = np.sum(heights)
+	try:
+		aspect = float(ax.get_aspect)
+	except:
+		aspect = 1
+	height_ax  = width_ax * ax.get_data_ratio() * aspect
+	heights    = np.array([2*fontsize,height_ax,4.5*fontsize,1.5*fontsize,3.6*fontsize])
+	height     = np.sum(heights)
 	
 	## Set bullet size of grid, depending of width, height and grid size
 	im.set_sizes([ 2 * min(width_ax,height_ax) / max(grid.nx,grid.ny) / pt ])
@@ -113,12 +115,10 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	g.set_width_ratios(widths)
 	fig.set_figheight(height)
 	fig.set_figwidth(width)
+	plt.subplots_adjust( left = 0 , right = 1 , bottom = 0 , top = 1 , wspace = 0 , hspace = 0 )
 	
 	## And save
-	plt.subplots_adjust( left = 0 , right = 1 , bottom = 0 , top = 1 , wspace = 0 , hspace = 0 )
 	plt.savefig( figf , dpi = 600 )
 	plt.close(fig)
 	
-	## Restore mpl params
-	mpl.rcParams = mpl_params
 
