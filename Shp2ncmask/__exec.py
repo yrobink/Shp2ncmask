@@ -134,7 +134,7 @@ def arguments( argv ):##{{{
 			raise IFileError(kwargs["input"])
 		ifileext = kwargs["input"].split(".")[-1]
 		if not ifileext == "shp":
-			raise OFileType(kwargs["input"])
+			raise IFileTypeError(kwargs["input"])
 	except KeyError:
 		print( "Error: no input file given." , file = sys.stderr )
 		arg_valid = False
