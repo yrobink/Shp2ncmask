@@ -26,6 +26,12 @@ Start by install with the command:
 python3 setup.py install
 ~~~
 
+Or for a user install:
+
+~~~bash
+python3 setup.py install --user
+~~~
+
 and just run the following command to access to the documentation:
 
 ~~~bash
