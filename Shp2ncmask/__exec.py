@@ -258,13 +258,13 @@ def start_shp2ncmask():##{{{
 	
 	if not arg_valid:
 		print( "Arguments not valid, abort.\nTry './shp2ncmask.py --help'." , file = sys.stderr )
-		return 1
+		sys.exit(1)
 	
 	## Special case 1
 	##===============
 	if kwargs["help"]:
 		print(doc_shp2ncmask)
-		return 0
+		sys.exit()
 	
 	## Extract kwargs
 	##===============
