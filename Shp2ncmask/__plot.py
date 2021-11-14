@@ -100,7 +100,7 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	widths   = np.array([3.8*fontsize , width_ax ,2*axeslw])
 	
 	try:
-		aspect = float(ax.get_aspect)
+		aspect = float(ax.get_aspect())
 	except:
 		aspect = 1
 	height_ax  = width_ax * ax.get_data_ratio() * aspect
