@@ -17,6 +17,15 @@ then
 	unzip data/$data_test_zip -d data/gadm36_FRA_shp/
 fi
 
+## Only for dev
+##=============
+
+if [[ $1 == "--test" ]]
+then
+	shp2ncmask -m weight -i $data_test -iepsg 4326 -o data/mask_test.nc -g 60000,1196000,128000,1617000,2681000,128000 -oepsg 27572 -fig data/fig_test.png -fepsg 4326 --debug 2
+	exit 0
+fi
+
 ## Print the documentation
 ##========================
 shp2ncmask --help
