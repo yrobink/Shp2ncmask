@@ -51,13 +51,28 @@ def arguments( argv ):##{{{
 	kwargs["oepsg"]     = "4326"
 	kwargs["fepsg"]     = "4326"
 	kwargs["ppe"]       = 100
+	kwargs["debug"]     = 0
 	
 	## Describe a column ?
 	dc = False
 	
+	## Step 0: debug mode ?
+	##=====================
+	read_index = []
+	if "--debug" in argv:
+		i = argv.index("--debug")
+		kwargs["debug"] = 1
+		read_index = read_index + [i]
+		try:
+			kwargs["debug"] = int(argv[i+1])
+			read_index = read_index + [i+1]
+		except:
+			pass
+	
 	## First transform arg in dict
 	##============================
-	read_index = []
+	if kwargs["debug"] > 1:
+		print( "debug::__exec.arguments: transform argv to dict" , file = sys.stderr )
 	for i,arg in enumerate(argv):
 		if arg in ["--help"]:
 			kwargs["help"] = True
@@ -108,6 +123,8 @@ def arguments( argv ):##{{{
 	
 	## Check if all arguments are used
 	##================================
+	if kwargs["debug"] > 1:
+		print( "debug::__exec.arguments: check if all arguments are used" , file = sys.stderr )
 	not_read_index = [ i for i in range(len(argv)) if i not in read_index]
 	if len(not_read_index) > 0:
 		print( "Warning: arguments '{}' not used.".format("','".join([argv[i] for i in not_read_index])), file = sys.stderr )
@@ -119,6 +136,8 @@ def arguments( argv ):##{{{
 	
 	## Check arguments
 	##================
+	if kwargs["debug"] > 1:
+		print( "debug::__exec.arguments: try/except of arguments" , file = sys.stderr )
 	arg_valid = True
 	
 	## input epsg
@@ -244,6 +263,12 @@ def arguments( argv ):##{{{
 		print( "Error: plot epsg:{} is not valid".format(kwargs["fepsg"]) , file = sys.stderr )
 		arg_valid = False
 	
+	## Final debug list
+	if kwargs["debug"] > 1:
+		print( "debug::__exec.arguments: list of identified parameters:" , file = sys.stderr )
+		for key in kwargs:
+			print( "   * {}: {}".format(key,kwargs[key]) , file = sys.stderr )
+	
 	return kwargs,arg_valid
 ##}}}
 
@@ -277,9 +302,12 @@ def start_shp2ncmask():##{{{
 	grid_par  = kwargs.get("grid")
 	ppe       = kwargs.get("ppe")
 	select    = kwargs.get("select")
+	debug     = kwargs.get("debug")
 	
 	## Read the shapefile
 	##===================
+	if debug > 0:
+		print( "debug::__exec.start_shp2ncmask: read shapefile" , file = sys.stderr )
 	ish = gpd.read_file(ifile)
 	if not ish.crs.to_epsg() == iepsg:
 		ish = ish.to_crs( epsg = iepsg )
@@ -287,6 +315,7 @@ def start_shp2ncmask():##{{{
 	## Select
 	##=======
 	if select is not None:
+		if debug > 0: print( "debug::__exec.start_shp2ncmask: select" , file = sys.stderr )
 		col,row = select
 		if col not in ish.columns:
 			print( "Error: '{}' is not a column. Abort.".format(col) , file = sys.stderr )
@@ -299,6 +328,7 @@ def start_shp2ncmask():##{{{
 	## Bounds
 	##=======
 	if kwargs["bounds"]:
+		if debug > 0: print( "debug::__exec.start_shp2ncmask: bounds" , file = sys.stderr )
 		print( "Bounds:" )
 		print( "* xmin: {:.6f}".format(ish.bounds["minx"].min()) )
 		print( "* xmax: {:.6f}".format(ish.bounds["maxx"].max()) )
@@ -309,6 +339,7 @@ def start_shp2ncmask():##{{{
 	## Special case 2
 	##===============
 	if kwargs["col"]:
+		if debug > 0: print( "debug::__exec.start_shp2ncmask: print columns" , file = sys.stderr )
 		print("Columns:")
 		for c in ish.columns:
 			print( "* {}".format(c) )
@@ -318,6 +349,7 @@ def start_shp2ncmask():##{{{
 	##===============
 	column = kwargs.get("row")
 	if column is not None:
+		if debug > 0: print( "debug::__exec.start_shp2ncmask: print rows of a column" , file = sys.stderr )
 		try:
 			rows = ish[column]
 			print( "Column {}:".format(column) )
@@ -330,14 +362,17 @@ def start_shp2ncmask():##{{{
 	
 	## Build the grid
 	##===============
+	if debug > 0: print( "debug::__exec.start_shp2ncmask: build the grid" , file = sys.stderr )
 	grid = Grid( grid_par[0] , grid_par[1] , epsg = oepsg , ppe = ppe )
 	
 	## Build the mask
 	##===============
+	if debug > 0: print( "debug::__exec.start_shp2ncmask: build the mask" , file = sys.stderr )
 	mask = build_mask( grid , ish , method )
 	
 	## Transform into xarray dataset and save
 	##=======================================
+	if debug > 0: print( "debug::__exec.start_shp2ncmask: transform mask in dataset and save" , file = sys.stderr )
 	dmask,encoding = mask_to_dataset( mask , grid , oepsg , method )
 	dmask.to_netcdf( ofile , encoding = encoding )
 	
@@ -345,6 +380,7 @@ def start_shp2ncmask():##{{{
 	##=======
 	figf  = kwargs.get("fig")
 	if figf is not None:
+		if debug > 0: print( "debug::__exec.start_shp2ncmask: figure" , file = sys.stderr )
 		build_figure( figf , kwargs["fepsg"] , oepsg , grid , ish , mask , method )
 	
 	sys.exit()
