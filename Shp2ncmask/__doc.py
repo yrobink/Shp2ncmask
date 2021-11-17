@@ -73,9 +73,9 @@ Optional parameters
 -fepsg (or --figure-epsg) default is 4326.
     epsg code of the figure.
 --debug [Nothing or int]
-	Enable the debug mode. Default level is 1 (print only the steps of the main
-	function), a value of 2 prints the steps of the functions called by the main
-	function, a value of 3 the steps of the functions called by functions, etc.
+    Enable the debug mode. Default level is 1 (print only the steps of the main
+    function), a value of 2 prints the steps of the functions called by the main
+    function, a value of 3 the steps of the functions called by functions, etc.
 
 About epsg
 ----------
