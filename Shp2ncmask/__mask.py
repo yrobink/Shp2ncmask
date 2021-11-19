@@ -26,6 +26,7 @@ import xarray    as xr
 import geopandas as gpd
 
 from .__release import version
+from .__release import src_url
 
 ###############
 ## Functions ##
@@ -84,7 +85,7 @@ def mask_to_dataset( mask , grid , oepsg , method ):##{{{
 	dmask.attrs["title"]         = "Mask"
 	dmask.attrs["Conventions"]   = "CF-1.6"
 	dmask.attrs["method"]        = method
-	dmask.attrs["Shp2ncmask_url"]     = "https://github.com/yrobink/Shp2ncmask"
+	dmask.attrs["Shp2ncmask_url"]     = src_url
 	dmask.attrs["Shp2ncmask_version"] = version
 	dmask.attrs["creation_date"]      = str(dt.datetime.utcnow())[:19] + " (UTC)"
 	
