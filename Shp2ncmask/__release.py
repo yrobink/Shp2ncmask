@@ -16,11 +16,19 @@
 ## You should have received a copy of the GNU General Public License
 ## along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
+##############
+## Packages ##
+##############
+
+import logging
+
+config = {}
+config["logging"] = logging.INFO
 
 version_major = 1
 version_minor = 0
 version_patch = 0
-version_extra = "b4"
+version_extra = "b5"
 version       = "{}.{}.{}{}".format(version_major,version_minor,version_patch,version_extra)
 
 
