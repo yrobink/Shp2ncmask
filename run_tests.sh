@@ -26,6 +26,6 @@ fi
 python3 setup.py install
 
 ## Run
-shp2ncmask -m weight -i $data_test -iepsg 4326 -o output_tests/mask_test.nc -g 60000,1196000,128000,1617000,2681000,128000 -oepsg 27572 -fig output_tests/fig_test.png -fepsg 4326
+shp2ncmask -m weight -i $data_test -iepsg 4326 -o output_tests/mask_test.nc -g 60000,1196000,128000,1617000,2681000,128000 -oepsg 27572 -fig output_tests/fig_test.png -fepsg 4326 --debug
 
 

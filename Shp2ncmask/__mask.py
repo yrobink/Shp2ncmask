@@ -20,6 +20,7 @@
 ## Packages ##
 ##############
 
+import logging
 import datetime  as dt
 import numpy     as np
 import xarray    as xr
@@ -27,6 +28,18 @@ import geopandas as gpd
 
 from .__release import version
 from .__release import src_url
+from .__release import config
+
+
+#############
+## Logging ##
+##############
+
+## Only errors from external module
+for mod in [dt,np,xr,gpd]:
+	logging.getLogger(mod.__name__).setLevel(logging.ERROR)
+logging.getLogger("fiona").setLevel(logging.ERROR)
+
 
 ###############
 ## Functions ##
@@ -36,6 +49,13 @@ def build_mask( grid , ish , method ):##{{{
 	"""
 	Build the 2d mask according to the method.
 	"""
+	
+	## Debug
+	logger = logging.getLogger(__name__)
+	logger.setLevel( config["logging"] )
+	logger.debug("build_mask:start")
+	
+	## Now script
 	mask = np.zeros( (grid.nx*grid.ny) )
 	
 	if method == "point":
@@ -62,6 +82,7 @@ def build_mask( grid , ish , method ):##{{{
 		mask[idx] = dI.to_crs(epsg=3395).area.values / grid.sq.loc[idx,:].to_crs(epsg=3395).area.values
 		mask[mask > 0] = 1
 	
+	logger.debug("build_mask:end")
 	return mask
 ##}}}
 
@@ -69,6 +90,12 @@ def mask_to_dataset( mask , grid , oepsg , method ):##{{{
 	"""
 	Transform the 2d array mask into a xarray.Dataset. Add also attributes.
 	"""
+	
+	## Debug
+	logger = logging.getLogger(__name__)
+	logger.setLevel( config["logging"] )
+	logger.debug("mask_to_dataset:start")
+	
 	if oepsg == "4326":
 		amask = xr.DataArray( mask.reshape(grid.y.size,grid.x.size) , dims = ["lat","lon"] , coords = [grid.lat,grid.lon] )
 		dmask = xr.Dataset( { "mask" : amask } )
@@ -135,6 +162,7 @@ def mask_to_dataset( mask , grid , oepsg , method ):##{{{
 		encoding["y"] = { "dtype" : "float32" , "zlib" : True , "complevel": 5 }
 		encoding[gm_name] = { "dtype" : "int32" , "zlib" : True , "complevel": 5 }
 	
+	logger.debug("mask_to_dataset:end")
 	return dmask,encoding
 ##}}}
 

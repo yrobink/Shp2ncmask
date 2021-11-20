@@ -23,6 +23,8 @@
 import sys,os
 import pyproj
 
+import logging
+
 import geopandas as gpd
 
 from .__doc        import doc_shp2ncmask
@@ -31,6 +33,7 @@ from .__grid       import Grid
 from .__mask       import build_mask
 from .__mask       import mask_to_dataset
 from .__plot       import build_figure
+from .__release    import config
 
 
 ###############
@@ -41,6 +44,11 @@ def arguments( argv ):##{{{
 	"""
 	This function is used to read and check args given by the users.
 	"""
+	## Debug
+	logger = logging.getLogger(__name__)
+	logger.setLevel( config["logging"] )
+	logger.debug("arguments:start")
+	
 	kwargs = {}
 	kwargs["help"]      = False
 	kwargs["col"]       = False
@@ -56,23 +64,12 @@ def arguments( argv ):##{{{
 	## Describe a column ?
 	dc = False
 	
-	## Step 0: debug mode ?
-	##=====================
-	read_index = []
-	if "--debug" in argv:
-		i = argv.index("--debug")
-		kwargs["debug"] = 1
-		read_index = read_index + [i]
-		try:
-			kwargs["debug"] = int(argv[i+1])
-			read_index = read_index + [i+1]
-		except:
-			pass
 	
 	## First transform arg in dict
 	##============================
-	if kwargs["debug"] > 1:
-		print( "debug::__exec.arguments: transform argv to dict" , file = sys.stderr )
+	read_index = []
+	if "--debug" in argv: read_index.append(argv.index("--debug"))
+	logger.debug("arguments:transform argv to dict")
 	for i,arg in enumerate(argv):
 		if arg in ["--help"]:
 			kwargs["help"] = True
@@ -123,8 +120,6 @@ def arguments( argv ):##{{{
 	
 	## Check if all arguments are used
 	##================================
-	if kwargs["debug"] > 1:
-		print( "debug::__exec.arguments: check if all arguments are used" , file = sys.stderr )
 	not_read_index = [ i for i in range(len(argv)) if i not in read_index]
 	if len(not_read_index) > 0:
 		print( "Warning: arguments '{}' not used.".format("','".join([argv[i] for i in not_read_index])), file = sys.stderr )
@@ -136,8 +131,6 @@ def arguments( argv ):##{{{
 	
 	## Check arguments
 	##================
-	if kwargs["debug"] > 1:
-		print( "debug::__exec.arguments: try/except of arguments" , file = sys.stderr )
 	arg_valid = True
 	
 	## input epsg
@@ -264,11 +257,9 @@ def arguments( argv ):##{{{
 		arg_valid = False
 	
 	## Final debug list
-	if kwargs["debug"] > 1:
-		print( "debug::__exec.arguments: list of identified parameters:" , file = sys.stderr )
-		for key in kwargs:
-			print( "   * {}: {}".format(key,kwargs[key]) , file = sys.stderr )
+	logger.debug( "arguments:list of identified parameters\n" + "\n".join( ["   * {}: {}".format(key,kwargs[key]) for key in kwargs] ) )
 	
+	logger.debug("arguments:end")
 	return kwargs,arg_valid
 ##}}}
 
@@ -276,6 +267,15 @@ def start_shp2ncmask():##{{{
 	"""
 	Toolchain.
 	"""
+	
+	## Start by check debug
+	##=====================
+	if "--debug" in sys.argv:
+		config["logging"] = logging.DEBUG
+	logger = logging.getLogger(__name__)
+	logger.setLevel( config["logging"] )
+	logging.basicConfig( level = config["logging"] )
+	logger.debug("start_shp2ncmask:start")
 	
 	## Read args
 	##==========
@@ -383,6 +383,7 @@ def start_shp2ncmask():##{{{
 		if debug > 0: print( "debug::__exec.start_shp2ncmask: figure" , file = sys.stderr )
 		build_figure( figf , kwargs["fepsg"] , oepsg , grid , ish , mask , method )
 	
+	logger.debug("start_shp2ncmask:end")
 	sys.exit()
 ##}}}
 

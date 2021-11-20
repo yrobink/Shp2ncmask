@@ -22,8 +22,10 @@
 
 import numpy     as np
 import geopandas as gpd
-
 from shapely.geometry import Point,MultiPoint,Polygon,MultiPolygon
+
+import logging
+from .__release import config
 
 ###############
 ## Functions ##
@@ -46,6 +48,9 @@ class Grid:
 	"""
 	
 	def __init__( self , xparams , yparams , epsg = 4326 , ppe = 100 ):##{{{
+		self.logger = logging.getLogger(__name__)
+		self.logger.setLevel( config["logging"] )
+		self.logger.debug("__init__:start")
 		self.xparams = xparams
 		self.yparams = yparams
 		self.epsg    = epsg
@@ -56,15 +61,20 @@ class Grid:
 		X,Y     = np.meshgrid(self.x,self.y)
 		self.X  = X.ravel()
 		self.Y  = Y.ravel()
+		self.logger.debug("__init__:build_square:start")
 		self.sq = gpd.GeoDataFrame( [ {"geometry" : Polygon(self.build_square(x,y)) }  for x,y in zip(self.X,self.Y) ] , crs = "EPSG:{}".format(self.epsg) )
 		self.sq["INDEX"] = range(self.nx*self.ny)
+		self.logger.debug("__init__:build_square:end")
 		
+		self.logger.debug("__init__:build_point:start")
 		self.pt = gpd.GeoDataFrame( [ {"geometry" : Point(x,y) }  for x,y in zip(self.X,self.Y) ] , crs = "EPSG:{}".format(self.epsg) )
 		self.pt["INDEX"] = range(self.nx*self.ny)
+		self.logger.debug("__init__:build_point:end")
 		
 		self.lat = None
 		self.lon = None
 		self._build_latlon()
+		self.logger.debug("__init__:end")
 		
 	##}}}
 	
@@ -88,6 +98,7 @@ class Grid:
 	##}}}
 	
 	def _build_latlon(self):##{{{
+		self.logger.debug("_build_latlon:start")
 		if self.epsg == "4326":
 			self.lon,self.lat = self.x,self.y
 			return
@@ -95,6 +106,7 @@ class Grid:
 		latlon   = np.array( [ np.array( geo.array_interface()["data"]) for geo in self.pt.to_crs( epsg = 4326 )["geometry"] ] ).reshape(-1,2)
 		self.lon = latlon[:,0].reshape(self.ny,self.nx)
 		self.lat = latlon[:,1].reshape(self.ny,self.nx)
+		self.logger.debug("_build_latlon:end")
 		
 	##}}}
 	

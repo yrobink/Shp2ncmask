@@ -20,11 +20,22 @@
 ## Packages ##
 ##############
 
+import logging
 import numpy               as np
 import matplotlib          as mpl
 import matplotlib.pyplot   as plt
 import matplotlib.gridspec as mplg
 import matplotlib.colors   as mplc
+
+from .__release import config
+
+#############
+## Logging ##
+##############
+
+## Only errors from external module
+for mod in [np,mpl,plt,mplg,mplc]:
+	logging.getLogger(mod.__name__).setLevel(logging.ERROR)
 
 
 ###############
@@ -35,6 +46,12 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	"""
 	Plot function of the mask
 	"""
+	## Debug
+	logger = logging.getLogger(__name__)
+	logger.setLevel( config["logging"] )
+	logger.debug("build_figure:start")
+	
+	## mpl params
 	mpl.rcdefaults()
 	mpl.rcParams['font.size'] = 7
 	mpl.rcParams['axes.linewidth'] = 0.5
@@ -120,5 +137,6 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	## And save
 	plt.savefig( figf , dpi = 600 )
 	plt.close(fig)
-	
+	logger.debug("build_figure:end")
+
 
