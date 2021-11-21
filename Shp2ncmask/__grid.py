@@ -20,12 +20,13 @@
 ## Packages ##
 ##############
 
+import logging
 import numpy     as np
 import geopandas as gpd
 from shapely.geometry import Point,MultiPoint,Polygon,MultiPolygon
 
-import logging
-from .__release import config
+from .__config import config
+
 
 ###############
 ## Functions ##

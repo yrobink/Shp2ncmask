@@ -20,42 +20,14 @@
 ## Packages ##
 ##############
 
-
-version_major = 1
-version_minor = 0
-version_patch = 0
-version_extra = "b5"
-version       = "{}.{}.{}{}".format(version_major,version_minor,version_patch,version_extra)
+import logging
 
 
-##
+#################
+## Config dict ##
+#################
 
-name = "shp2ncmask"
+config = {}
+config["logging"] = logging.INFO
 
-
-##
-
-description      = "shp2ncmask is a tools to transform a shapefile in a netcdf file"
-long_description = \
-"""
-shp2ncmask is a tools to transform a shapefile in a netcdf file. Several methods
-are proposed, and the input/output projections can be customized.
-"""
-
-
-##
-
-license = "GNU-GPL3"
-
-
-##
-
-authors       = ["Yoann Robin"]
-authors_email = ["yoann.robin.k@gmail.com"]
-author_doc    = ", ".join( [ ath + " ({})".format(athm) for ath,athm in zip(authors,authors_email) ] )
-
-
-##
-
-src_url = "https://github.com/yrobink/Shp2ncmask"
 

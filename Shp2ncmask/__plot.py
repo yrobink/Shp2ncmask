@@ -27,7 +27,8 @@ import matplotlib.pyplot   as plt
 import matplotlib.gridspec as mplg
 import matplotlib.colors   as mplc
 
-from .__release import config
+from .__config import config
+
 
 #############
 ## Logging ##

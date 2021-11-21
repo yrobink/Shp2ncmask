@@ -21,10 +21,9 @@
 ##############
 
 import sys,os
-import pyproj
-
 import logging
 
+import pyproj
 import geopandas as gpd
 
 from .__doc        import doc_shp2ncmask
@@ -33,7 +32,7 @@ from .__grid       import Grid
 from .__mask       import build_mask
 from .__mask       import mask_to_dataset
 from .__plot       import build_figure
-from .__release    import config
+from .__config     import config
 
 
 ###############

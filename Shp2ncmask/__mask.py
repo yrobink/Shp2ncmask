@@ -28,7 +28,7 @@ import geopandas as gpd
 
 from .__release import version
 from .__release import src_url
-from .__release import config
+from .__config  import config
 
 
 #############
