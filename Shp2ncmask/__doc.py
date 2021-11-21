@@ -72,7 +72,7 @@ Optional parameters
     File of a figure which plot the mask.
 -fepsg (or --figure-epsg) default is 4326.
     epsg code of the figure.
---debug [Nothing or int]
+--debug
     Enable the debug mode.
 
 About epsg
