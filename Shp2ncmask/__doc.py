@@ -36,7 +36,6 @@ are proposed, and the input/output projections can be customized.
 
 Parameters
 ----------
-
 -i (or --input) [string]
     The input shapefile.
 -g (or --grid) [comma separated float]
@@ -47,7 +46,6 @@ Parameters
 
 Optional parameters
 -------------------
-
 --help
     Print the documentation.
 -b (or --bounds)
@@ -79,7 +77,6 @@ Optional parameters
 
 About epsg
 ----------
-
 The EPSG (European Petroleum Survey Group) is a code to identify a cartographic
 projection. For example:
 - epsg:4326 is the classic latitude / longitude projection (also called WGS 84)
@@ -91,7 +88,6 @@ projection. For example:
 
 Grid
 ----
-
 The grid is represented by 6 comma separated values taking the form:
     -g xmin,xmax,dx,ymin,ymax,dy
 where:
@@ -116,7 +112,6 @@ between the corners. The default value of '--point-per-edge' is equal to 100.
 
 Methods
 -------
-
 'point'
     Each grid cell is represented by its center. The value is equal to 1 if the
     center is in the interior of the polygons defined by the shapefile, 0
@@ -139,7 +134,6 @@ Methods
 
 Shapefile sources
 -----------------
-
 Two (not exhaustive) sources of shapefile are Natural Earth and GADM-3.6:
 - https://www.naturalearthdata.com/
 - https://gadm.org/download_country_v3.html
@@ -147,8 +141,7 @@ Two (not exhaustive) sources of shapefile are Natural Earth and GADM-3.6:
 
 License {}
 -------{}
-
-Copyright(c) 2021 Yoann Robin
+Copyright(c) 2021 / 2022 Yoann Robin
 
 Shp2ncmask is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -166,7 +159,6 @@ along with Shp2ncmask.  If not, see <https://www.gnu.org/licenses/>.
 
 Sources and author
 ------------------
-
 - Sources are available at {}.
 - Author(s): {}.
 

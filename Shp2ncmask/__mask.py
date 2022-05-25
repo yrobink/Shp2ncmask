@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 Yoann Robin
+## Copyright(c) 2021 / 2022 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 

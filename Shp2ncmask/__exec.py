@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 Yoann Robin
+## Copyright(c) 2021 / 2022 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -26,7 +26,7 @@ import logging
 import pyproj
 import geopandas as gpd
 
-from .__doc        import doc_shp2ncmask
+from .__curses_doc import print_doc
 from .__exceptions import *
 from .__grid       import Grid
 from .__mask       import build_mask
@@ -290,7 +290,7 @@ def start_shp2ncmask():##{{{
 	## Special case 1
 	##===============
 	if kwargs["help"]:
-		print(doc_shp2ncmask)
+		print_doc()
 		sys.exit()
 	
 	## Extract kwargs
