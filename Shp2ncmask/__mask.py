@@ -129,6 +129,7 @@ def mask_to_dataset( mask , grid , oepsg , method ):##{{{
 	dmask.mask.attrs["standard_name"] = "mask"
 	dmask.mask.attrs["long_name"]     = "mask"
 	dmask.mask.attrs["units"]         = "1"
+	dmask.mask.attrs["coordinates"]   = "lat lon"
 	
 	if not oepsg == "4326":
 		
