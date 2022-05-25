@@ -66,6 +66,8 @@ Optional parameters
     epsg code of the input shapefile.
 -oepsg (or --output-epsg) [int] default is 4326.
     epsg code of the output mask.
+-gmn (or --grid-mapping-name) default is infered from the projection
+    Set the name of the projection in the final netcdf file.
 --point-per-edge [int] default is 100.
     Point per edge, see grid section.
 -fig (or --figure) [string]

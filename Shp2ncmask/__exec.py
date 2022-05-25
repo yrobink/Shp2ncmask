@@ -116,6 +116,9 @@ def arguments( argv ):##{{{
 		if arg in ["-fepsg","--figure-epsg"]:
 			kwargs["fepsg"] = argv[i+1]
 			read_index = read_index + [i,i+1]
+		if arg in ["-gmn","--grid-mapping-name"]:
+			kwargs["gm_name"] = argv[i+1]
+			read_index = read_index + [i,i+1]
 	
 	## Check if all arguments are used
 	##================================
@@ -372,7 +375,7 @@ def start_shp2ncmask():##{{{
 	## Transform into xarray dataset and save
 	##=======================================
 	if debug > 0: print( "debug::__exec.start_shp2ncmask: transform mask in dataset and save" , file = sys.stderr )
-	dmask,encoding = mask_to_dataset( mask , grid , oepsg , method )
+	dmask,encoding = mask_to_dataset( mask , grid , oepsg , method , kwargs.get("gm_name") )
 	dmask.to_netcdf( ofile , encoding = encoding )
 	
 	## Figure

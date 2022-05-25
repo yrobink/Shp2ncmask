@@ -86,7 +86,7 @@ def build_mask( grid , ish , method ):##{{{
 	return mask
 ##}}}
 
-def mask_to_dataset( mask , grid , oepsg , method ):##{{{
+def mask_to_dataset( mask , grid , oepsg , method , gm_name = None ):##{{{
 	"""
 	Transform the 2d array mask into a xarray.Dataset. Add also attributes.
 	"""
@@ -103,7 +103,8 @@ def mask_to_dataset( mask , grid , oepsg , method ):##{{{
 		amask = xr.DataArray( mask.reshape(grid.y.size,grid.x.size) , dims = ["y","x"] , coords = [grid.y,grid.x] )
 		lat   = xr.DataArray( grid.lat , dims = ["y","x"] , coords = [grid.y,grid.x] )
 		lon   = xr.DataArray( grid.lon , dims = ["y","x"] , coords = [grid.y,grid.x] )
-		gm_name   = grid.pt.crs.coordinate_operation.name.replace(" ","_")
+		if gm_name is None:
+			gm_name   = grid.pt.crs.coordinate_operation.name.replace(" ","_")
 		gm_method = grid.pt.crs.coordinate_operation.method_name.replace(" ","_").replace("(","").replace(")","")
 		dmask = xr.Dataset( { "mask" : amask , "lat" : lat , "lon" : lon , gm_name : 1 } )
 	
