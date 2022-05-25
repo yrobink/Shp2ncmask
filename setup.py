@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 Yoann Robin
+## Copyright(c) 2021 / 2022 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -18,14 +18,10 @@
 
 
 ## Start by import release details
-from Shp2ncmask.__release import name
-from Shp2ncmask.__release import version
-from Shp2ncmask.__release import description
-from Shp2ncmask.__release import long_description
-from Shp2ncmask.__release import authors
-from Shp2ncmask.__release import authors_email
-from Shp2ncmask.__release import src_url
-from Shp2ncmask.__release import license
+with open( "Shp2ncmask/__release.py" , "r" ) as f:
+	lines = f.readlines()
+exec("".join(lines))
+
 
 ## Required elements
 author           = ", ".join(authors)
@@ -55,7 +51,7 @@ classifiers      = ["Development Status :: 4 - Beta",
 
 
 ## Now the setup
-from distutils.core import setup
+from setuptools import setup
 
 setup(  name             = name,
 		version          = version,
