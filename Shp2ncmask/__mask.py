@@ -155,13 +155,13 @@ def mask_to_dataset( mask , grid , oepsg , method , gm_name = None ):##{{{
 		dmask[gm_name].attrs["references"]        = "https://spatialreference.org/ref/epsg/{}/".format(oepsg)
 	
 	## Encoding
-	encoding = { "lon"  : { "dtype" : "float32" , "zlib" : True , "complevel": 5 } ,
-				 "lat"  : { "dtype" : "float32" , "zlib" : True , "complevel": 5 } ,
+	encoding = { "lon"  : { "dtype" : "double" , "zlib" : True , "complevel": 5 } ,
+				 "lat"  : { "dtype" : "double" , "zlib" : True , "complevel": 5 } ,
 				 "mask" : { "dtype" : "float32" , "zlib" : True , "complevel": 5 } }
 	
 	if not oepsg == "4326":
-		encoding["x"] = { "dtype" : "float32" , "zlib" : True , "complevel": 5 }
-		encoding["y"] = { "dtype" : "float32" , "zlib" : True , "complevel": 5 }
+		encoding["x"] = { "dtype" : "double" , "zlib" : True , "complevel": 5 }
+		encoding["y"] = { "dtype" : "double" , "zlib" : True , "complevel": 5 }
 		encoding[gm_name] = { "dtype" : "int32" , "zlib" : True , "complevel": 5 }
 	
 	logger.debug("mask_to_dataset:end")
