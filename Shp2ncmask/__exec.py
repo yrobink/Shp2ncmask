@@ -47,10 +47,10 @@ from .__exceptions import AbortException
 from .__curses_doc import print_doc
 from .__S2NParams  import s2nParams
 
-from .__grid       import Grid
-from .__mask       import build_mask
-from .__mask       import save_netcdf
-from .__plot       import build_figure
+from .__grid import Grid
+from .__mask import build_mask
+from .__mask import save_netcdf
+from .__plot import build_figure
 
 
 ##################

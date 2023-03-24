@@ -27,30 +27,36 @@ import matplotlib.pyplot   as plt
 import matplotlib.gridspec as mplg
 import matplotlib.colors   as mplc
 
-from .__config import config
+from .__S2NParams  import s2nParams
+from .__logs import log_start_end
 
 
-#############
-## Logging ##
-##############
+##################
+## Init logging ##
+##################
 
-## Only errors from external module
-for mod in [np,mpl,plt,mplg,mplc]:
-	logging.getLogger(mod.__name__).setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+for mod in ["numpy","geopandas","fiona","matplotlib"]:
+	logging.getLogger(mod).setLevel(logging.ERROR)
 
 
 ###############
 ## Functions ##
 ###############
 
-def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
+@log_start_end(logger)
+def build_figure( grid , ish , mask ):
+	
 	"""
 	Plot function of the mask
 	"""
-	## Debug
-	logger = logging.getLogger(__name__)
-	logger.setLevel( config["logging"] )
-	logger.debug("build_figure:start")
+	
+	##
+	ofig   = s2nParams.figure
+	fepsg  = s2nParams.fepsg
+	oepsg  = s2nParams.oepsg
+	method = s2nParams.method
 	
 	## mpl params
 	mpl.rcdefaults()
@@ -70,7 +76,7 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	if str(grid.pt.crs.to_epsg()) == fepsg:
 		XY = np.stack( (grid.X,grid.Y) , -1 )
 	else:
-		XY = np.array( [ np.array( geo.array_interface()["data"]) for geo in grid.pt.to_crs( epsg = fepsg )["geometry"] ] ).reshape(-1,2)
+		XY = np.array( [ np.asarray(geo.coords) for geo in grid.pt.to_crs( epsg = fepsg )["geometry"] ] ).reshape(-1,2)
 	
 	## Figure
 	fig = plt.figure()
@@ -136,8 +142,7 @@ def build_figure( figf , fepsg , oepsg , grid , ish , mask , method ):
 	plt.subplots_adjust( left = 0 , right = 1 , bottom = 0 , top = 1 , wspace = 0 , hspace = 0 )
 	
 	## And save
-	plt.savefig( figf , dpi = 600 )
+	plt.savefig( ofig , dpi = 600 )
 	plt.close(fig)
-	logger.debug("build_figure:end")
 
 
