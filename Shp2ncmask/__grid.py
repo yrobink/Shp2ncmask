@@ -26,8 +26,6 @@ import numpy     as np
 import geopandas as gpd
 from shapely.geometry import Point,MultiPoint,Polygon,MultiPolygon
 
-from .__config import config
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 for mod in ["numpy","geopandas","fiona"]:
