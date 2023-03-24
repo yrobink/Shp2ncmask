@@ -78,7 +78,7 @@ def run_shp2ncmask():##{{{
 	select   = s2nParams.select
 	bounds   = s2nParams.bounds
 	list_col = s2nParams.list_columns
-	desc_col = s2nParams.describe_columns
+	desc_col = s2nParams.describe_column
 	gparams  = s2nParams.grid
 	method   = s2nParams.method
 	

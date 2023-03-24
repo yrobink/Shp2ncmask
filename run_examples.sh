@@ -34,7 +34,7 @@ shp2ncmask --method weight --input $DATA0 --iepsg 4326 --output data/mask_27572.
 ## The third is an example for a selection, we want only the IDF.
 ## We print the columns, rows, select to find bounds and we build the mask.
 shp2ncmask --input $DATA1 --list-columns
-shp2ncmask --input $DATA1 --describe-columns NAME_1
+shp2ncmask --input $DATA1 --describe-column NAME_1
 shp2ncmask --input $DATA1 --select NAME_1 'Île-de-France' --bounds
 shp2ncmask --method weight --input $DATA1 --select NAME_1 'Île-de-France' --grid 1.4,3.6,0.05,48.1,49.3,0.05 --output data/mask_IDF_4326.nc --figure figures/control_IDF_4326.png --fepsg 4326
 

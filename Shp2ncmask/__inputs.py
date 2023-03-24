@@ -52,7 +52,7 @@ def read_inputs(*argv):##{{{
 	parser.add_argument( "-h" , "--help"  , action = "store_const" , const = True , default = False )
 	parser.add_argument( "--bounds"       , action = "store_const" , const = True , default = False )
 	parser.add_argument( "--list-columns" , action = "store_const" , const = True , default = False )
-	parser.add_argument( "--describe-columns" )
+	parser.add_argument( "--describe-column" )
 	parser.add_argument( "--select"            , nargs = 2 )
 	parser.add_argument( "--log"               , nargs = '*' , default = ["WARNING"] )
 	parser.add_argument( "--input"             )

@@ -48,7 +48,7 @@ class S2NParams:
 		self.help              = False
 		self.bounds            = False
 		self.list_columns      = False
-		self.describe_columns  = None
+		self.describe_column   = None
 		self.select            = None
 		self.log               = None
 		self.input             = None
@@ -96,7 +96,7 @@ class S2NParams:
 				raise Exception( f"Bad input file format: {self.input}")
 			
 			##
-			if self.bounds or self.help or self.list_columns or (self.describe_columns is not None):
+			if self.bounds or self.help or self.list_columns or (self.describe_column is not None):
 				pass
 			else:
 				

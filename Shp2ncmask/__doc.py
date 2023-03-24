@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 Yoann Robin
+## Copyright(c) 2021 / 2023 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -36,11 +36,11 @@ are proposed, and the input/output projections can be customized.
 
 Parameters
 ----------
--i (or --input) [string]
+--input [string]
     The input shapefile.
--g (or --grid) [comma separated float]
+--grid [comma separated float]
     Grid used. See the grid section.
--o (or --output) [string]
+--output [string]
     The output netcdf file.
 
 
@@ -48,32 +48,28 @@ Optional parameters
 -------------------
 --help
     Print the documentation.
--b (or --bounds)
+--bounds
     Print the bounds of input file and quit. Can be used with '-s' and '-iepsg'.
--lc (or --list-columns)
+--list-columns
     List the columns of the shapefile and quit.
--dc (or --describe-column)
+--describe-column
     Describe values of a column.
--s (or --select) [string and string]
+--select [string and string]
     Select a row of a column. Must be pass as '-s COL_NAME ROW_NAME'
--m (or --method) [string] default is 'point'.
+--method [string] default is 'point'.
     Method used to build the mask. See the method section.
 --threshold [float] default is 0.8
     Threshold used by the method 'threshold'.
--iepsg (or --input-epsg) [int] default is 4326.
+--iepsg [str] default is 4326.
     epsg code of the input shapefile.
--oepsg (or --output-epsg) [int] default is 4326.
+--output-epsg [str] default is 4326.
     epsg code of the output mask.
--gmn (or --grid-mapping-name) default is infered from the projection
-    Set the name of the projection in the final netcdf file.
 --point-per-edge [int] default is 100.
     Point per edge, see grid section.
--fig (or --figure) [string]
+--figure [string]
     File of a figure which plot the mask.
--fepsg (or --figure-epsg) default is 4326.
+--fepsg default is 4326.
     epsg code of the figure.
---debug
-    Enable the debug mode.
 
 About epsg
 ----------
@@ -89,7 +85,7 @@ projection. For example:
 Grid
 ----
 The grid is represented by 6 comma separated values taking the form:
-    -g xmin,xmax,dx,ymin,ymax,dy
+    --grid xmin,xmax,dx,ymin,ymax,dy
 where:
 - xmin is the min value of the x-axis,
 - xmax is the max value of the x-axis,
@@ -134,14 +130,14 @@ Methods
 
 Shapefile sources
 -----------------
-Two (not exhaustive) sources of shapefile are Natural Earth and GADM-3.6:
+Two (not exhaustive) sources of shapefile are Natural Earth and GADM:
 - https://www.naturalearthdata.com/
 - https://gadm.org/download_country_v3.html
 
 
 License {}
 -------{}
-Copyright(c) 2021 / 2022 Yoann Robin
+Copyright(c) 2021 / 2023 Yoann Robin
 
 Shp2ncmask is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
