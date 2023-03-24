@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 Yoann Robin
+## Copyright(c) 2021 / 2023 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -21,10 +21,10 @@
 ##############
 
 
-version_major = 1
-version_minor = 2
+version_major = 2
+version_minor = 0
 version_patch = 0
-version_extra = ""
+version_extra = "a0"
 version       = "{}.{}.{}{}".format(version_major,version_minor,version_patch,version_extra)
 
 

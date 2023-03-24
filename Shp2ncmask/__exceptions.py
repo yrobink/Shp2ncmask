@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 Yoann Robin
+## Copyright(c) 2021 / 2023 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -25,38 +25,7 @@
 ## Functions ##
 ###############
 
-class MethodError(Exception):
-	def __init__( self , arg , default_arg ):
-		self.message = "Error: the method argument '{}' must be in '{}'".format(arg,"','".join(default_arg) )
-		super().__init__()
-
-class GridError(Exception):
-	def __init__( self , grid ):
-		self.message = "Error: the grid '{}' must be in the format 'xmin,xmax,dx,ymin,ymax,dy'".format(grid)
-		super().__init__()
-
-class IFileError(Exception):
-	def __init__( self , ifile ):
-		self.message = "Error: the input file '{}' is not a file.".format(ifile)
-		super().__init__()
-
-class IFileTypeError(Exception):
-	def __init__( self , ifile ):
-		self.message = "Error: the input file '{}' is not a shapefile.".format(ifile)
-		super().__init__()
-
-class OFilePathError(Exception):
-	def __init__( self , path , pathfile ):
-		self.message = "Error: the directory '{}' of the output file '{}' is not valid.".format(path,pathfile)
-		super().__init__()
-
-class OFileTypeError(Exception):
-	def __init__( self , ofile ):
-		self.message = "Error: the output file '{}' is not a netcdf file.".format(ofile)
-		super().__init__()
-
-class PpeValueError(Exception):
-	def __init__( self , ppe ):
-		self.message = "Error: the point-per-edge '{}' must be at least equal to 2.".format(ppe)
-		super().__init__()
+class AbortException(Exception):
+	def __init__( self , *args , **kwargs ):
+		super().__init__( *args , **kwargs )
 

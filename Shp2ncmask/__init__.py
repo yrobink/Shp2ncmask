@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 Yoann Robin
+## Copyright(c) 2021 / 2023 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -20,7 +20,14 @@
 ## Imports ##
 #############
 
+from .__exec    import start_shp2ncmask
 from .__release import version
-__version__ = version
+from .__doc     import doc_shp2ncmask
 
-from .__exec import start_shp2ncmask
+###################
+## Set variables ##
+###################
+
+__version__ = version
+__doc__     = doc_shp2ncmask
+

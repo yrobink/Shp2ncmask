@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 / 2022 Yoann Robin
+## Copyright(c) 2021 / 2023 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -21,291 +21,55 @@
 ##############
 
 import sys,os
+import datetime as dt
 import logging
 
+import numpy  as np
+import xarray as xr
+import netCDF4
 import pyproj
+import shapely
 import geopandas as gpd
 
+try:
+	import matplotlib as mpl
+except:
+	mpl = None
+
+from .__release import version
+from .__logs    import LINE
+from .__logs    import init_logging
+from .__logs    import log_start_end
+
+from .__inputs  import read_inputs
+
+from .__exceptions import AbortException
+
 from .__curses_doc import print_doc
-from .__exceptions import *
-from .__grid       import Grid
-from .__mask       import build_mask
-from .__mask       import mask_to_dataset
-from .__plot       import build_figure
-from .__config     import config
+from .__S2NParams  import s2nParams
+
+#from .__grid       import Grid
+#from .__mask       import build_mask
+#from .__mask       import mask_to_dataset
+#from .__plot       import build_figure
+
+
+##################
+## Init logging ##
+##################
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 ###############
 ## Functions ##
 ###############
 
-def arguments( argv ):##{{{
-	"""
-	This function is used to read and check args given by the users.
-	"""
-	## Debug
-	logger = logging.getLogger(__name__)
-	logger.setLevel( config["logging"] )
-	logger.debug("arguments:start")
+@log_start_end(logger)
+def run_shp2ncmask():##{{{
 	
-	kwargs = {}
-	kwargs["help"]      = False
-	kwargs["col"]       = False
-	kwargs["bounds"]    = False
-	kwargs["method"]    = "point"
-	kwargs["threshold"] = 0.8
-	kwargs["iepsg"]     = "4326"
-	kwargs["oepsg"]     = "4326"
-	kwargs["fepsg"]     = "4326"
-	kwargs["ppe"]       = 100
-	kwargs["debug"]     = 0
-	
-	## Describe a column ?
-	dc = False
-	
-	
-	## First transform arg in dict
-	##============================
-	read_index = []
-	if "--debug" in argv: read_index.append(argv.index("--debug"))
-	logger.debug("arguments:transform argv to dict")
-	for i,arg in enumerate(argv):
-		if arg in ["--help"]:
-			kwargs["help"] = True
-			read_index = read_index + [i]
-		if arg in ["-b","--bounds"]:
-			kwargs["bounds"] = True
-			read_index = read_index + [i]
-		if arg in ["-lc","--list-columns"]:
-			kwargs["col"] = True
-			read_index = read_index + [i]
-		if arg in ["-dc","--describe-column"]:
-			kwargs["row"] = argv[i+1]
-			dc = True
-			read_index = read_index + [i,i+1]
-		if arg in ["-s","--select"]:
-			kwargs["select"] = [argv[i+1],argv[i+2]]
-			read_index = read_index + [i,i+1,i+2]
-		if arg in ["-m","--method"]:
-			kwargs["method"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg == "--threshold":
-			kwargs["threshold"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-g","--grid"]:
-			kwargs["grid"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-iepsg","--input-epsg"]:
-			kwargs["iepsg"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-oepsg","--output-epsg"]:
-			kwargs["oepsg"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-i","--input"]:
-			kwargs["input"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-o","--output"]:
-			kwargs["output"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["--point-per-edge"]:
-			kwargs["ppe"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-fig","--figure"]:
-			kwargs["fig"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-fepsg","--figure-epsg"]:
-			kwargs["fepsg"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-		if arg in ["-gmn","--grid-mapping-name"]:
-			kwargs["gm_name"] = argv[i+1]
-			read_index = read_index + [i,i+1]
-	
-	## Check if all arguments are used
-	##================================
-	not_read_index = [ i for i in range(len(argv)) if i not in read_index]
-	if len(not_read_index) > 0:
-		print( "Warning: arguments '{}' not used.".format("','".join([argv[i] for i in not_read_index])), file = sys.stderr )
-	
-	## Special case 1: user ask help
-	##==============================
-	if kwargs["help"]:
-		return kwargs,True
-	
-	## Check arguments
-	##================
-	arg_valid = True
-	
-	## input epsg
-	try:
-		p = pyproj.Proj("epsg:{}".format(kwargs["iepsg"]))
-	except pyproj.crs.CRSError:
-		print( "Error: input epsg:{} is not valid".format(kwargs["iepsg"]) , file = sys.stderr )
-		arg_valid = False
-	
-	## input file
-	try:
-		if not os.path.isfile(kwargs["input"]):
-			raise IFileError(kwargs["input"])
-		ifileext = kwargs["input"].split(".")[-1]
-		if not ifileext == "shp":
-			raise IFileTypeError(kwargs["input"])
-	except KeyError:
-		print( "Error: no input file given." , file = sys.stderr )
-		arg_valid = False
-	except IFileError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	except IFileTypeError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	
-	## Special case: list/describe columns or bounds
-	if kwargs["col"] or dc or kwargs["bounds"]:
-		return kwargs,arg_valid
-	
-	## Method
-	l_method  = ["point","weight","threshold","interior","exterior"]
-	try:
-		if kwargs["method"] not in l_method:
-			raise MethodError( kwargs["method"] , l_method )
-	except MethodError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	
-	## threshold
-	try:
-		kwargs["threshold"] = float(kwargs["threshold"])
-	except ValueError:
-		print( "Error: the threshold '{}' is not castable to float.".format(kwargs["threshold"]) , file = sys.stderr )
-		arg_valid = False
-	
-	## Grid
-	try:
-		g = [float(x) for x in kwargs["grid"].split(",")]
-		if not len(g) == 6:
-			raise GridError( kwargs["grid"] )
-	except KeyError:
-		if not kwargs["col"]:
-			print( "Error: no grid given." , file = sys.stderr )
-			arg_valid = False
-	except ValueError:
-		if not kwargs["col"]:
-			print( "Error: at least one values of the grid '{}' is not castable to float.".format(kwargs["grid"]) , file = sys.stderr )
-			arg_valid = False
-	except GridError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	else:
-		kwargs["grid"] = [g[:3],g[3:]]
-	
-	## output epsg
-	try:
-		p = pyproj.Proj("epsg:{}".format(kwargs["oepsg"]))
-	except pyproj.crs.CRSError:
-		print( "Error: output epsg:{} is not valid".format(kwargs["oepsg"]) , file = sys.stderr )
-		arg_valid = False
-	
-	## output file
-	try:
-		path = os.path.sep.join( kwargs["output"].split(os.path.sep)[:-1] )
-		if len(path) == 0: path = "."
-		ofile = kwargs["output"].split(os.path.sep)[-1]
-		if not os.path.isdir(path) and not kwargs["col"]:
-			raise OFilePathError(path,kwargs["output"])
-		if not ofile.split(".")[-1] == "nc":
-			raise OFileTypeError(ofile)
-	except KeyError:
-		if not kwargs["col"]:
-			print( "Error: no output file given." , file = sys.stderr )
-			arg_valid = False
-	except OFilePathError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	except OFileTypeError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	
-	## Point per edge
-	try:
-		kwargs["ppe"] = int(kwargs["ppe"])
-		if kwargs["ppe"] < 2:
-			raise PpeValueError(kwargs["ppe"])
-	except ValueError:
-		print( "Error: the point-per-edge parameter '{}' is not castable to int.".format(kwargs["ppe"]) , file = sys.stderr )
-		arg_valid = False
-	except PpeValueError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	
-	## output fig file
-	try:
-		path = os.path.sep.join( kwargs["fig"].split(os.path.sep)[:-1] )
-		if len(path) == 0: path = "."
-		ofile = kwargs["fig"].split(os.path.sep)[-1]
-		if not os.path.isdir(path):
-			raise OFilePathError(path,kwargs["fig"])
-	except KeyError:
-		## If not in kwargs, no plot
-		pass
-	except OFilePathError as e:
-		print( e.message , file = sys.stderr )
-		arg_valid = False
-	
-	## output figure epsg
-	try:
-		p = pyproj.Proj("epsg:{}".format(kwargs["fepsg"]))
-	except pyproj.crs.CRSError:
-		print( "Error: plot epsg:{} is not valid".format(kwargs["fepsg"]) , file = sys.stderr )
-		arg_valid = False
-	
-	## Final debug list
-	logger.debug( "arguments:list of identified parameters\n" + "\n".join( ["   * {}: {}".format(key,kwargs[key]) for key in kwargs] ) )
-	
-	logger.debug("arguments:end")
-	return kwargs,arg_valid
-##}}}
-
-def start_shp2ncmask():##{{{
-	"""
-	Toolchain.
-	"""
-	
-	## Start by check debug
-	##=====================
-	if "--debug" in sys.argv:
-		config["logging"] = logging.DEBUG
-	logger = logging.getLogger(__name__)
-	logger.setLevel( config["logging"] )
-	logging.basicConfig( level = config["logging"] )
-	logger.debug("start_shp2ncmask:start")
-	
-	## Read args
-	##==========
-	kwargs,arg_valid = arguments(sys.argv[1:])
-	
-	if not arg_valid:
-		print( "Arguments not valid, abort.\nTry 'shp2ncmask --help'." , file = sys.stderr )
-		sys.exit(1)
-	
-	## Special case 1
-	##===============
-	if kwargs["help"]:
-		print_doc()
-		sys.exit()
-	
-	## Extract kwargs
-	##===============
-	method    = kwargs.get("method")
-	threshold = kwargs.get("threshold")
-	iepsg     = kwargs.get("iepsg")
-	oepsg     = kwargs.get("oepsg")
-	ifile     = kwargs.get("input")
-	ofile     = kwargs.get("output")
-	grid_par  = kwargs.get("grid")
-	ppe       = kwargs.get("ppe")
-	select    = kwargs.get("select")
-	debug     = kwargs.get("debug")
-	
+	return
 	## Read the shapefile
 	##===================
 	if debug > 0:
@@ -386,7 +150,82 @@ def start_shp2ncmask():##{{{
 		build_figure( figf , kwargs["fepsg"] , oepsg , grid , ish , mask , method )
 	
 	logger.debug("start_shp2ncmask:end")
-	sys.exit()
+##}}}
+
+def start_shp2ncmask(*argv):##{{{
+	"""
+	Shp2ncmask.start_shp2ncmask
+	===========================
+	
+	Starting point of 'shp2ncmask'.
+	"""
+	
+	## Time counter
+	walltime0 = dt.datetime.utcnow()
+	
+	## Read input
+	read_inputs(*argv)
+	
+	## Init logs
+	init_logging()
+	logger.info(LINE)
+	logger.info( "Start: {}".format(str(walltime0)[:19] + " (UTC)") )
+	logger.info(LINE)
+	
+	## Package version
+	list_pkgs = [ ("numpy"     ,np),
+	              ("xarray"    ,xr),
+	              ("netCDF4"   ,netCDF4),
+	              ("pyproj"    ,pyproj),
+	              ("shapely"   ,shapely),
+	              ("geopandas" ,gpd)
+	            ]
+	if mpl is not None:
+		list_pkgs.append( ("matplotlib",mpl) )
+	
+	logger.info( "Packages version:" )
+	logger.info( " * {:{fill}{align}{n}}".format( "shp2ncmask" , fill = " " , align = "<" , n = 12 ) + f"version {version}" )
+	for (name_pkg,pkg) in list_pkgs:
+		logger.info( " * {:{fill}{align}{n}}".format( name_pkg , fill = " " , align = "<" , n = 12 ) +  f"version {pkg.__version__}" )
+	logger.info(LINE)
+	
+	## Serious functions start here
+	try:
+		## List of all input
+		logger.info("Input parameters:")
+		for key in s2nParams.keys():
+			logger.info( " * {:{fill}{align}{n}}".format( key , fill = " ",align = "<" , n = 10 ) + ": {}".format(s2nParams[key]) )
+		logger.info(LINE)
+		
+		## Check inputs
+		abort = s2nParams.check()
+		logger.info(LINE)
+		
+		## User asks help
+		if s2nParams.help:
+			print_doc()
+			abort = True
+		
+		## In case of abort, raise Exception
+		if abort:
+			raise AbortException
+		
+		## Go!
+		run_shp2ncmask()
+		logger.info(LINE)
+		
+	except AbortException:
+		pass
+	except Exception as e:
+		logger.error( f"Error: {e}" )
+	
+	## End
+	walltime1 = dt.datetime.utcnow()
+	logger.info( "End: {}".format(str(walltime1)[:19] + " (UTC)") )
+	logger.info( "Wall time: {}".format(walltime1 - walltime0) )
+	logger.info(LINE)
+	
+
 ##}}}
 
 
