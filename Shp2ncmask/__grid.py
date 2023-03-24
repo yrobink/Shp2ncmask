@@ -20,6 +20,7 @@
 ## Packages ##
 ##############
 
+import datetime as dt
 import logging
 import numpy     as np
 import geopandas as gpd
@@ -54,6 +55,11 @@ class Grid:
 	"""
 	
 	def __init__( self , xparams , yparams , epsg = 4326 , ppe = 100 ):##{{{
+		
+		logger.info(f"shp2ncmask:Grid:__init__:start")
+		time0 = dt.datetime.utcnow()
+		
+		
 		self.xparams = xparams
 		self.yparams = yparams
 		self.epsg    = epsg
@@ -73,6 +79,10 @@ class Grid:
 		self.lat = None
 		self.lon = None
 		self._build_latlon()
+		
+		time1 = dt.datetime.utcnow()
+		logger.info(f"shp2ncmask:Grid:__init__:walltime:{time1-time0}")
+		logger.info(f"shp2ncmask:Grid:__init__:end")
 		
 	##}}}
 	

@@ -48,10 +48,12 @@ for mod in ["numpy","geopandas","fiona"]:
 ###############
 
 @log_start_end(logger)
-def build_mask( grid , ish , method ):##{{{
+def build_mask( grid , ish ):##{{{
 	"""
 	Build the 2d mask according to the method.
 	"""
+	
+	method = s2nParams.method
 	
 	## Now script
 	mask = np.zeros( (grid.ny * grid.nx) )

@@ -50,8 +50,7 @@ from .__S2NParams  import s2nParams
 from .__grid       import Grid
 from .__mask       import build_mask
 from .__mask       import save_netcdf
-#from .__mask       import mask_to_dataset
-#from .__plot       import build_figure
+from .__plot       import build_figure
 
 
 ##################
@@ -130,22 +129,17 @@ def run_shp2ncmask():##{{{
 	
 	
 	## Build the grid
-	logger.info( "Build the grid..." )
 	grid = Grid( gparams[:3] , gparams[3:] , epsg = oepsg , ppe = ppe )
-	logger.info( "Build the grid. OK." )
 	
 	## Build the mask
-	mask = build_mask( grid , ish , method )
+	mask = build_mask( grid , ish )
 	
 	## Save in netcdf
 	save_netcdf( mask , grid )
-	return
 	
 	## Figure
-	figf  = kwargs.get("fig")
-	if figf is not None:
-		if debug > 0: print( "debug::__exec.start_shp2ncmask: figure" , file = sys.stderr )
-		build_figure( figf , kwargs["fepsg"] , oepsg , grid , ish , mask , method )
+	if s2nParams.figure is not None:
+		build_figure( grid , ish , mask )
 	
 ##}}}
 
