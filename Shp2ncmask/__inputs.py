@@ -39,6 +39,14 @@ logger.addHandler(logging.NullHandler())
 
 def read_inputs(*argv):##{{{
 	
+	argv = list(argv)
+	## Special case of grid
+	if "--grid" in argv:
+		idx = argv.index("--grid") + 1
+		if argv[idx][0] == "-":
+			argv[idx] = " " + argv[idx]
+	
+	##
 	parser = argparse.ArgumentParser( add_help = False )
 	
 	parser.add_argument( "-h" , "--help"  , action = "store_const" , const = True , default = False )
@@ -50,7 +58,6 @@ def read_inputs(*argv):##{{{
 	parser.add_argument( "--input"             )
 	parser.add_argument( "--output"            )
 	parser.add_argument( "--grid"              )
-	parser.add_argument( "--grid_mapping_name" )
 	parser.add_argument( "--method"            , default = "point" , type = str )
 	parser.add_argument( "--threshold"         , default = 0.8     , type = float )
 	parser.add_argument( "--iepsg"             , default = "4326"  , type = str )

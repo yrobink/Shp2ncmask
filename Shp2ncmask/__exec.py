@@ -25,7 +25,6 @@ import datetime as dt
 import logging
 
 import numpy  as np
-import xarray as xr
 import netCDF4
 import pyproj
 import shapely
@@ -48,8 +47,9 @@ from .__exceptions import AbortException
 from .__curses_doc import print_doc
 from .__S2NParams  import s2nParams
 
-#from .__grid       import Grid
-#from .__mask       import build_mask
+from .__grid       import Grid
+from .__mask       import build_mask
+from .__mask       import save_netcdf
 #from .__mask       import mask_to_dataset
 #from .__plot       import build_figure
 
@@ -60,6 +60,8 @@ from .__S2NParams  import s2nParams
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+for mod in ["numpy","geopandas","fiona"]:
+	logging.getLogger(mod).setLevel(logging.ERROR)
 
 
 ###############
@@ -69,87 +71,82 @@ logger.addHandler(logging.NullHandler())
 @log_start_end(logger)
 def run_shp2ncmask():##{{{
 	
-	return
-	## Read the shapefile
-	##===================
-	if debug > 0:
-		print( "debug::__exec.start_shp2ncmask: read shapefile" , file = sys.stderr )
-	ish = gpd.read_file(ifile)
-	if not ish.crs.to_epsg() == iepsg:
-		ish = ish.to_crs( epsg = iepsg )
+	## Params
+	input    = s2nParams.input
+	iepsg    = s2nParams.iepsg
+	oepsg    = s2nParams.oepsg
+	ppe      = s2nParams.point_per_edge
+	select   = s2nParams.select
+	bounds   = s2nParams.bounds
+	list_col = s2nParams.list_columns
+	desc_col = s2nParams.describe_columns
+	gparams  = s2nParams.grid
+	method   = s2nParams.method
 	
-	## Select
-	##=======
-	if select is not None:
-		if debug > 0: print( "debug::__exec.start_shp2ncmask: select" , file = sys.stderr )
-		col,row = select
-		if col not in ish.columns:
-			print( "Error: '{}' is not a column. Abort.".format(col) , file = sys.stderr )
-			sys.exit(1)
-		ish = ish[ish[col] == row]
-		if ish.size == 0:
-			print( "Error: data are empty after selection, maybe the row {} is not valid ? Abort.".format(row) , file = sys.stderr )
-			sys.exit(1)
+	## Read the shapefile
+	logger.info( "Read input file" )
+	ish = gpd.read_file(input)
+	if not str(ish.crs.to_epsg()) == iepsg:
+		ish = ish.to_crs( epsg = int(iepsg) )
 	
 	## Bounds
-	##=======
-	if kwargs["bounds"]:
-		if debug > 0: print( "debug::__exec.start_shp2ncmask: bounds" , file = sys.stderr )
-		print( "Bounds:" )
-		print( "* xmin: {:.6f}".format(ish.bounds["minx"].min()) )
-		print( "* xmax: {:.6f}".format(ish.bounds["maxx"].max()) )
-		print( "* ymin: {:.6f}".format(ish.bounds["miny"].min()) )
-		print( "* ymax: {:.6f}".format(ish.bounds["maxy"].max()) )
-		sys.exit()
+	if bounds:
+		logger.info( "Bounds is on, start" )
+		out = "xmin;xmax;ymin;ymax\n" + \
+		";".join(["{:.6f}".format(ish.bounds["minx"].min()),"{:.6f}".format(ish.bounds["maxx"].max()),"{:.6f}".format(ish.bounds["miny"].min()),"{:.6f}".format(ish.bounds["maxy"].max())])
+		logger.info(out)
+		print(out)
+		return
 	
-	## Special case 2
-	##===============
-	if kwargs["col"]:
-		if debug > 0: print( "debug::__exec.start_shp2ncmask: print columns" , file = sys.stderr )
-		print("Columns:")
-		for c in ish.columns:
-			print( "* {}".format(c) )
-		sys.exit()
+	## List columns
+	if list_col:
+		logger.info( "Print list of columns" )
+		out = ";".join( [c for c in ish.columns] )
+		logger.info(out)
+		print(out)
+		return
 	
-	## Special case 3
-	##===============
-	column = kwargs.get("row")
-	if column is not None:
-		if debug > 0: print( "debug::__exec.start_shp2ncmask: print rows of a column" , file = sys.stderr )
+	## Describe a specific column
+	if desc_col is not None:
+		logger.info( f"Describe column on for '{desc_col}'" )
 		try:
-			rows = ish[column]
-			print( "Column {}:".format(column) )
-			for r in rows:
-				print( "* {}".format(r) )
-		except KeyError:
-			print( "The column '{}' is not valid, abort.\nSee the '--list-columns' option.".format(column) , file = sys.stderr )
-			sys.exit(1)
-		sys.exit()
+			out = "\n".join( [str(r) for r in ish[desc_col]] )
+			logger.info(out)
+			print(out)
+		except:
+			logger.error( f"The column '{desc_col}' is not valid." )
+		return
+	
+	## If a selection
+	if select is not None:
+		col,row = select
+		logger.info( f"Selection of '{col}' / '{row}'..." )
+		if col not in ish.columns:
+			raise Exception( f"Column '{col}' is not a column." )
+		ish = ish[ish[col] == row]
+		if ish.size == 0:
+			raise Exception( f"Data are empty after selection, maybe the row '{row}' is not valid ?".format(row) )
+		logger.info( "Selection OK" )
+	
 	
 	## Build the grid
-	##===============
-	if debug > 0: print( "debug::__exec.start_shp2ncmask: build the grid" , file = sys.stderr )
-	grid = Grid( grid_par[0] , grid_par[1] , epsg = oepsg , ppe = ppe )
+	logger.info( "Build the grid..." )
+	grid = Grid( gparams[:3] , gparams[3:] , epsg = oepsg , ppe = ppe )
+	logger.info( "Build the grid. OK." )
 	
 	## Build the mask
-	##===============
-	if debug > 0: print( "debug::__exec.start_shp2ncmask: build the mask" , file = sys.stderr )
 	mask = build_mask( grid , ish , method )
 	
-	## Transform into xarray dataset and save
-	##=======================================
-	if debug > 0: print( "debug::__exec.start_shp2ncmask: transform mask in dataset and save" , file = sys.stderr )
-	dmask,encoding = mask_to_dataset( mask , grid , oepsg , method , kwargs.get("gm_name") )
-	dmask.to_netcdf( ofile , encoding = encoding )
+	## Save in netcdf
+	save_netcdf( mask , grid )
+	return
 	
 	## Figure
-	##=======
 	figf  = kwargs.get("fig")
 	if figf is not None:
 		if debug > 0: print( "debug::__exec.start_shp2ncmask: figure" , file = sys.stderr )
 		build_figure( figf , kwargs["fepsg"] , oepsg , grid , ish , mask , method )
 	
-	logger.debug("start_shp2ncmask:end")
 ##}}}
 
 def start_shp2ncmask(*argv):##{{{
@@ -174,7 +171,6 @@ def start_shp2ncmask(*argv):##{{{
 	
 	## Package version
 	list_pkgs = [ ("numpy"     ,np),
-	              ("xarray"    ,xr),
 	              ("netCDF4"   ,netCDF4),
 	              ("pyproj"    ,pyproj),
 	              ("shapely"   ,shapely),

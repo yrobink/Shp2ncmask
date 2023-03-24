@@ -30,7 +30,6 @@ packages         = ["Shp2ncmask"]
 package_dir      = { "Shp2ncmask" : "Shp2ncmask" }
 scripts          = ["scripts/shp2ncmask"]
 requires         = [ "numpy (>=1.17)",
-					 "xarray (>=0.15)",
 					 "netCDF4 (>=1.5)",
 					 "pyproj (>=2.5)",
 					 "shapely (>=1.7)",

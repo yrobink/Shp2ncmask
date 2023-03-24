@@ -1,5 +1,5 @@
 
-## Copyright(c) 2021 / 2022 Yoann Robin
+## Copyright(c) 2021 / 2023 Yoann Robin
 ## 
 ## This file is part of Shp2ncmask.
 ## 
@@ -23,45 +23,44 @@
 import logging
 import datetime  as dt
 import numpy     as np
-import xarray    as xr
 import geopandas as gpd
+import netCDF4
+import pyproj
 
-from .__release import version
-from .__release import src_url
-from .__config  import config
+from .__logs      import log_start_end
+from .__release   import version
+from .__release   import src_url
+from .__S2NParams import s2nParams
 
 
 #############
 ## Logging ##
 ##############
 
-## Only errors from external module
-for mod in [dt,np,xr,gpd]:
-	logging.getLogger(mod.__name__).setLevel(logging.ERROR)
-logging.getLogger("fiona").setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+for mod in ["numpy","geopandas","fiona"]:
+	logging.getLogger(mod).setLevel(logging.ERROR)
 
 
 ###############
 ## Functions ##
 ###############
 
+@log_start_end(logger)
 def build_mask( grid , ish , method ):##{{{
 	"""
 	Build the 2d mask according to the method.
 	"""
 	
-	## Debug
-	logger = logging.getLogger(__name__)
-	logger.setLevel( config["logging"] )
-	logger.debug("build_mask:start")
-	
 	## Now script
-	mask = np.zeros( (grid.nx*grid.ny) )
+	mask = np.zeros( (grid.ny * grid.nx) )
 	
 	if method == "point":
 		dI = gpd.overlay( grid.pt.to_crs(ish.crs) , ish , how = "intersection" , keep_geom_type = False )
 	else:
 		dI = gpd.overlay( grid.sq.to_crs(ish.crs) , ish , how = "intersection" , keep_geom_type = False )
+	
 	if method == "point":
 		idx = dI["INDEX"].values
 		mask[idx] = 1
@@ -82,89 +81,122 @@ def build_mask( grid , ish , method ):##{{{
 		mask[idx] = dI.to_crs(epsg=3395).area.values / grid.sq.loc[idx,:].to_crs(epsg=3395).area.values
 		mask[mask > 0] = 1
 	
-	logger.debug("build_mask:end")
-	return mask
+	return mask.reshape( (grid.ny,grid.nx) )
 ##}}}
 
-def mask_to_dataset( mask , grid , oepsg , method , gm_name = None ):##{{{
-	"""
-	Transform the 2d array mask into a xarray.Dataset. Add also attributes.
-	"""
+def find_gm_params():##{{{
+	oepsg = s2nParams.oepsg
+	crs   = pyproj.crs.CRS.from_epsg(oepsg)
 	
-	## Debug
-	logger = logging.getLogger(__name__)
-	logger.setLevel( config["logging"] )
-	logger.debug("mask_to_dataset:start")
+	cf_params = crs.to_cf()
 	
-	if oepsg == "4326":
-		amask = xr.DataArray( mask.reshape(grid.y.size,grid.x.size) , dims = ["lat","lon"] , coords = [grid.lat,grid.lon] )
-		dmask = xr.Dataset( { "mask" : amask } )
-	else:
-		amask = xr.DataArray( mask.reshape(grid.y.size,grid.x.size) , dims = ["y","x"] , coords = [grid.y,grid.x] )
-		lat   = xr.DataArray( grid.lat , dims = ["y","x"] , coords = [grid.y,grid.x] )
-		lon   = xr.DataArray( grid.lon , dims = ["y","x"] , coords = [grid.y,grid.x] )
-		if gm_name is None:
-			gm_name   = grid.pt.crs.coordinate_operation.name.replace(" ","_")
-		gm_method = grid.pt.crs.coordinate_operation.method_name.replace(" ","_").replace("(","").replace(")","")
-		dmask = xr.Dataset( { "mask" : amask , "lat" : lat , "lon" : lon , gm_name : 1 } )
+	name = cf_params["grid_mapping_name"]
+	if "lambert" in name and "conformal" in name:
+		name = "Lambert_Conformal"
+		attrs = {}
+		for key in ["grid_mapping_name","standard_parallel","longitude_of_central_meridian","latitude_of_projection_origin","false_easting","false_northing","scale_factor"]:
+			attrs[key] = str(cf_params.get(key))
 	
-	## Add attributes
-	##===============
-	dmask.attrs["title"]         = "Mask"
-	dmask.attrs["Conventions"]   = "CF-1.6"
-	dmask.attrs["method"]        = method
-	dmask.attrs["Shp2ncmask_url"]     = src_url
-	dmask.attrs["Shp2ncmask_version"] = version
-	dmask.attrs["creation_date"]      = str(dt.datetime.utcnow())[:19] + " (UTC)"
+	return name,attrs
+##}}}
+
+@log_start_end(logger)
+def save_netcdf( mask , grid ):##{{{
 	
-	dmask.lat.attrs["axis"]           = "y"
-	dmask.lat.attrs["long_name"]      = "Latitude"
-	dmask.lat.attrs["standard_name"]  = "latitude"
-	dmask.lat.attrs["units"]          = "degrees_north"
+	## Parameters
+	method  = s2nParams.method
+	ofile   = s2nParams.output
+	oepsg   = s2nParams.oepsg
 	
-	dmask.lon.attrs["axis"]           = "x"
-	dmask.lon.attrs["long_name"]      = "Longitude"
-	dmask.lon.attrs["standard_name"]  = "longitude"
-	dmask.lon.attrs["units"]          = "degrees_east"
-	
-	dmask.mask.attrs["standard_name"] = "mask"
-	dmask.mask.attrs["long_name"]     = "mask"
-	dmask.mask.attrs["units"]         = "1"
-	dmask.mask.attrs["coordinates"]   = "lat lon"
-	
-	if not oepsg == "4326":
+	##
+	with netCDF4.Dataset( ofile , "w" ) as ncf:
 		
-		dmask.mask.attrs["grid_mapping"] = gm_name
+		## Dimensions
+		ncdims = {}
+		ncvars = {}
+		if oepsg == "4326":
+			ncdims["lat"] = ncf.createDimension( "lat" , grid.lat.size )
+			ncdims["lon"] = ncf.createDimension( "lon" , grid.lon.size )
+			
+			ncvars["lat"] = ncf.createVariable( "lat" , "double" , ("lat",) , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.lat.size,) )
+			ncvars["lon"] = ncf.createVariable( "lon" , "double" , ("lon",) , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.lon.size,) )
+		else:
+			ncdims["y"] = ncf.createDimension( "y" , grid.y.size )
+			ncdims["x"] = ncf.createDimension( "x" , grid.x.size )
+			
+			ncvars["y"]   = ncf.createVariable(   "y" , "double" , ("y",)    , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,) )
+			ncvars["x"]   = ncf.createVariable(   "x" , "double" , ("x",)    , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.x.size,) )
+			ncvars["lat"] = ncf.createVariable( "lat" , "double" , ("y","x") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size) )
+			ncvars["lon"] = ncf.createVariable( "lon" , "double" , ("y","x") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size) )
+			
+			## Fill and add y / x values / attributes
+			ncvars["y"][:] = grid.y[:]
+			ncvars["x"][:] = grid.x[:]
+			
+			ncvars["y"].setncattr( "standard_name" , "projection_y_coordinate"    )
+			ncvars["y"].setncattr( "long_name"     , "y coordinate of projection" )
+			ncvars["x"].setncattr( "standard_name" , "projection_x_coordinate"    )
+			ncvars["x"].setncattr( "long_name"     , "x coordinate of projection" )
+			try:
+				ncvars["y"].setncattr( "units" , grid.pt.crs.axis_info[1].unit_name )
+			except:
+				pass
+			try:
+				ncvars["x"].setncattr( "units" , grid.pt.crs.axis_info[0].unit_name )
+			except:
+				pass
 		
-		dmask.x.attrs["standard_name"] = "projection_x_coordinate"
-		dmask.x.attrs["long_name"]     = "x coordinate of projection"
-		try:
-			dmask.x.attrs["units"]         = grid.pt.crs.axis_info[0].unit_name
-		except:
-			pass
+		## Fill and add lat / lon values / attributes
+		ncvars["lat"][:] = grid.lat[:]
+		ncvars["lon"][:] = grid.lon[:]
 		
-		dmask.y.attrs["standard_name"] = "projection_x_coordinate"
-		dmask.y.attrs["long_name"]     = "x coordinate of projection"
-		try:
-			dmask.y.attrs["units"]         = grid.pt.crs.axis_info[1].unit_name
-		except:
-			pass
+		ncvars["lat"].setncattr("axis"          , "y"             )
+		ncvars["lat"].setncattr("long_name"     , "Latitude"      )
+		ncvars["lat"].setncattr("standard_name" , "latitude"      )
+		ncvars["lat"].setncattr("units"         , "degrees_north" )
 		
-		dmask[gm_name].attrs["grid_mapping_name"] = gm_method
-		dmask[gm_name].attrs["EPSG"]              = "{}".format(oepsg)
-		dmask[gm_name].attrs["references"]        = "https://spatialreference.org/ref/epsg/{}/".format(oepsg)
+		ncvars["lon"].setncattr("axis"          , "x"             )
+		ncvars["lon"].setncattr("long_name"     , "Longitude"    )
+		ncvars["lon"].setncattr("standard_name" , "longitude"    )
+		ncvars["lon"].setncattr("units"         , "degrees_east" )
+		
+		## Grid mapping coordinates, if needed
+		if not oepsg == "4326":
+			
+			gm_name,gm_attrs = find_gm_params()
+			
+			ncvars[gm_name]    = ncf.createVariable( gm_name , "int32" )
+			ncvars[gm_name][:] = 1
+			for key in gm_attrs:
+				ncvars[gm_name].setncattr( key , gm_attrs[key] )
+			ncvars[gm_name].setncattr( "EPSG" , oepsg )
+		
+		## The main variable
+		if not oepsg == "4326":
+			ncvars["area_fraction"] = ncf.createVariable( "area_fraction" , "double" , ("y","x") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size) )
+			ncvars["area_fraction"].setncattr( "grid_mapping"  , gm_name )
+		else:
+			ncvars["area_fraction"] = ncf.createVariable( "area_fraction" , "double" , ("lat","lon") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.lat.size,grid.lon.size) )
+		
+		ncvars["area_fraction"][:] = mask[:]
+		
+		ncvars["area_fraction"].setncattr( "standard_name" , "area_fraction" )
+		ncvars["area_fraction"].setncattr( "long_name"     , "Area Fraction" )
+		ncvars["area_fraction"].setncattr( "units"         , "1" )
+		ncvars["area_fraction"].setncattr( "coordinates"   , "lat lon" )
+		
+		ncvars["area_type"] = ncf.createVariable( "area_type" , "int32" )
+		ncvars["area_type"][:] = 1
+		ncvars["area_type"].setncattr( "standard_name" , "all_area_types" )
+		ncvars["area_type"].setncattr( "long_name"     , "All Area Types" )
+		
+		## Global attributes
+		ncf.setncattr("title"              , "Mask" )
+		ncf.setncattr("Conventions"        , "CF-1.10" )
+		ncf.setncattr("method"             , method )
+		ncf.setncattr("Shp2ncmask_url"     , src_url )
+		ncf.setncattr("Shp2ncmask_version" , version )
+		ncf.setncattr("creation_date"      , str(dt.datetime.utcnow())[:19] + " (UTC)" )
 	
-	## Encoding
-	encoding = { "lon"  : { "dtype" : "double" , "zlib" : True , "complevel": 5 } ,
-				 "lat"  : { "dtype" : "double" , "zlib" : True , "complevel": 5 } ,
-				 "mask" : { "dtype" : "float32" , "zlib" : True , "complevel": 5 } }
-	
-	if not oepsg == "4326":
-		encoding["x"] = { "dtype" : "double" , "zlib" : True , "complevel": 5 }
-		encoding["y"] = { "dtype" : "double" , "zlib" : True , "complevel": 5 }
-		encoding[gm_name] = { "dtype" : "int32" , "zlib" : True , "complevel": 5 }
-	
-	logger.debug("mask_to_dataset:end")
-	return dmask,encoding
 ##}}}
 
