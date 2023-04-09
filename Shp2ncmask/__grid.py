@@ -20,11 +20,13 @@
 ## Packages ##
 ##############
 
+import itertools as itt
 import datetime as dt
 import logging
 import numpy     as np
 import geopandas as gpd
 from shapely.geometry import Point,MultiPoint,Polygon,MultiPolygon
+import pyproj
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -68,15 +70,21 @@ class Grid:
 		X,Y     = np.meshgrid(self.x,self.y)
 		self.X  = X.ravel()
 		self.Y  = Y.ravel()
+		logger.info(" * Build projected squares")
 		self.sq = gpd.GeoDataFrame( [ {"geometry" : Polygon(self.build_square(x,y)) }  for x,y in zip(self.X,self.Y) ] , crs = "EPSG:{}".format(self.epsg) )
 		self.sq["INDEX"] = range(self.nx*self.ny)
 		
+		logger.info(" * Build projected points")
 		self.pt = gpd.GeoDataFrame( [ {"geometry" : Point(x,y) }  for x,y in zip(self.X,self.Y) ] , crs = "EPSG:{}".format(self.epsg) )
 		self.pt["INDEX"] = range(self.nx*self.ny)
 		
 		self.lat = None
 		self.lon = None
 		self._build_latlon()
+		
+		self.lat_bnds = None
+		self.lon_bnds = None
+		self._build_latlon_bnds()
 		
 		time1 = dt.datetime.utcnow()
 		logger.info(f"shp2ncmask:Grid:__init__:walltime:{time1-time0}")
@@ -108,10 +116,28 @@ class Grid:
 			self.lon,self.lat = self.x,self.y
 			return
 		
+		logger.info(" * Build lat-lon coordinates")
+		
 		latlon   = np.array( [ np.asarray(geo.coords) for geo in self.pt.to_crs( epsg = 4326 )["geometry"] ] ).reshape(-1,2)
 #		latlon   = np.array( [ np.array( geo.array_interface()["data"]) for geo in self.pt.to_crs( epsg = 4326 )["geometry"] ] ).reshape(-1,2)
 		self.lon = latlon[:,0].reshape(self.ny,self.nx)
 		self.lat = latlon[:,1].reshape(self.ny,self.nx)
+		
+	##}}}
+	
+	def _build_latlon_bnds(self):##{{{
+		if self.epsg == "4326":
+			return
+		logger.info(" * Build lat-lon bounds")
+		self.lat_bnds = np.zeros( (self.y.size,self.x.size,4) ) + np.nan
+		self.lon_bnds = np.zeros( (self.y.size,self.x.size,4) ) + np.nan
+		
+		transf = pyproj.Transformer.from_crs( int(self.epsg) , 4326 )
+		for j,i in itt.product(range(self.y.size),range(self.x.size)):
+			for ji,sy,sx in zip([0,1,2,3],[-1,-1,1,1],[-1,1,1,-1]):
+				self.lat_bnds[j,i,ji],self.lon_bnds[j,i,ji] = transf.transform( yy = self.y[j] + sy * self.dy / 2 , xx = self.x[i] + sx * self.dx / 2 )
+		
+		
 		
 	##}}}
 	
