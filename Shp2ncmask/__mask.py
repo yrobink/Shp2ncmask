@@ -123,13 +123,16 @@ def save_netcdf( mask , grid ):##{{{
 			ncvars["lat"] = ncf.createVariable( "lat" , "double" , ("lat",) , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.lat.size,) )
 			ncvars["lon"] = ncf.createVariable( "lon" , "double" , ("lon",) , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.lon.size,) )
 		else:
-			ncdims["y"] = ncf.createDimension( "y" , grid.y.size )
-			ncdims["x"] = ncf.createDimension( "x" , grid.x.size )
+			ncdims["y"]   = ncf.createDimension( "y"   , grid.y.size )
+			ncdims["x"]   = ncf.createDimension( "x"   , grid.x.size )
+			ncdims["nv4"] = ncf.createDimension( "nv4" ,           4 )
 			
-			ncvars["y"]   = ncf.createVariable(   "y" , "double" , ("y",)    , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,) )
-			ncvars["x"]   = ncf.createVariable(   "x" , "double" , ("x",)    , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.x.size,) )
-			ncvars["lat"] = ncf.createVariable( "lat" , "double" , ("y","x") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size) )
-			ncvars["lon"] = ncf.createVariable( "lon" , "double" , ("y","x") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size) )
+			ncvars["y"]    = ncf.createVariable(        "y" , "double" ,          ("y",) , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,) )
+			ncvars["x"]    = ncf.createVariable(        "x" , "double" ,          ("x",) , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.x.size,) )
+			ncvars["lat"]  = ncf.createVariable(      "lat" , "double" ,       ("y","x") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size) )
+			ncvars["lon"]  = ncf.createVariable(      "lon" , "double" ,       ("y","x") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size) )
+			ncvars["latb"] = ncf.createVariable( "lat_bnds" , "double" , ("y","x","nv4") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size,4) )
+			ncvars["lonb"] = ncf.createVariable( "lon_bnds" , "double" , ("y","x","nv4") , shuffle = False , compression = "zlib" , complevel = 5 , chunksizes = (grid.y.size,grid.x.size,4) )
 			
 			## Fill and add y / x values / attributes
 			ncvars["y"][:] = grid.y[:]
@@ -147,6 +150,10 @@ def save_netcdf( mask , grid ):##{{{
 				ncvars["x"].setncattr( "units" , grid.pt.crs.axis_info[0].unit_name )
 			except:
 				pass
+			
+			## Fill bounds
+			ncvars["latb"][:] = grid.lat_bnds[:]
+			ncvars["lonb"][:] = grid.lon_bnds[:]
 		
 		## Fill and add lat / lon values / attributes
 		ncvars["lat"][:] = grid.lat[:]
@@ -162,8 +169,11 @@ def save_netcdf( mask , grid ):##{{{
 		ncvars["lon"].setncattr("standard_name" , "longitude"    )
 		ncvars["lon"].setncattr("units"         , "degrees_east" )
 		
+		
 		## Grid mapping coordinates, if needed
 		if not oepsg == "4326":
+			ncvars["lat"].setncattr( "bounds" , "lat_bnds" )
+			ncvars["lon"].setncattr( "bounds" , "lon_bnds" )
 			
 			gm_name,gm_attrs = find_gm_params()
 			
