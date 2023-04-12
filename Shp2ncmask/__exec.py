@@ -24,6 +24,8 @@ import sys,os
 import datetime as dt
 import logging
 
+from unidecode import unidecode
+
 import numpy  as np
 import netCDF4
 import pyproj
@@ -66,6 +68,12 @@ for mod in ["numpy","geopandas","fiona"]:
 ###############
 ## Functions ##
 ###############
+
+def normalize_str(s):
+	us = unidecode(s)
+	for c in [" ","-","_","\"","\'"]:
+		us = us.replace(c,"")
+	return us.lower()
 
 @log_start_end(logger)
 def run_shp2ncmask():##{{{
@@ -120,8 +128,23 @@ def run_shp2ncmask():##{{{
 	if select is not None:
 		col,row = select
 		logger.info( f"Selection of '{col}' / '{row}'..." )
+
+		## Check if column is valid
 		if col not in ish.columns:
 			raise Exception( f"Column '{col}' is not a column." )
+		
+		## Check if row is valid
+		if row not in ish[col]:
+			logger.info( " * Try decoding" )
+			rows  = np.unique(ish[col].values).tolist()
+			urows = [normalize_str(s) for s in rows]
+			urow  = normalize_str(row)
+			logger.info( f" * List of unirows: " + ", ".join(urows) )
+			logger.info( f" * Asked unirow: {urow}" )
+			if urow not in urows:
+				raise Exception( f"The row {row} is not in the column {col}" )
+			row = rows[urows.index(urow)]
+		
 		ish = ish[ish[col] == row]
 		if ish.size == 0:
 			raise Exception( f"Data are empty after selection, maybe the row '{row}' is not valid ?".format(row) )
