@@ -96,7 +96,7 @@ def find_gm_params():##{{{
 	if "lambert" in name and "conformal" in name:
 		name = "Lambert_Conformal"
 		attrs = {}
-		for key in ["grid_mapping_name","standard_parallel","longitude_of_central_meridian","latitude_of_projection_origin","false_easting","false_northing","scale_factor"]:
+		for key in ["grid_mapping_name","standard_parallel","longitude_of_central_meridian","latitude_of_projection_origin","false_easting","false_northing"]:
 			attrs[key] = str(cf_params.get(key))
 	
 	return name,attrs
